@@ -1,0 +1,85 @@
+category,intent,sample_user_prompt
+Inventory Management,check_stock_level,What is the current stock level of item SKU-1042?
+Inventory Management,check_stock_level,How many units of raw material A are left in warehouse 2?
+Inventory Management,low_stock_alert,Show me all items below reorder point
+Inventory Management,low_stock_alert,Which products are running low on stock this week?
+Inventory Management,stock_transfer,Transfer 50 units of item X from Warehouse A to Warehouse B
+Inventory Management,stock_transfer,How do I move inventory between locations?
+Inventory Management,stock_adjustment,I need to adjust inventory count for item Y due to damage
+Inventory Management,stock_adjustment,Record a stock write-off for expired goods
+Inventory Management,inventory_valuation,What is the total inventory value as of today?
+Inventory Management,inventory_valuation,Show inventory valuation by category using FIFO method
+Inventory Management,batch_tracking,Track the batch number for shipment #4532
+Inventory Management,batch_tracking,Which batch does this serial number belong to?
+Inventory Management,warehouse_location,Where is item SKU-2210 stored in the warehouse?
+Inventory Management,cycle_count,Schedule a cycle count for warehouse 3 next week
+Finance & Accounting,check_invoice_status,What is the status of invoice INV-2024-0087?
+Finance & Accounting,check_invoice_status,Has invoice #45210 been paid yet?
+Finance & Accounting,create_invoice,Generate an invoice for customer ABC Corp for order #7789
+Finance & Accounting,accounts_payable,Show me all pending vendor payments due this week
+Finance & Accounting,accounts_payable,What is our total accounts payable balance?
+Finance & Accounting,accounts_receivable,List overdue customer invoices
+Finance & Accounting,accounts_receivable,What is our current accounts receivable aging report?
+Finance & Accounting,expense_report,I want to submit an expense report for my business trip
+Finance & Accounting,expense_report,What is the status of my last expense claim?
+Finance & Accounting,budget_check,How much of our marketing budget has been spent this quarter?
+Finance & Accounting,budget_check,Are we over budget in the IT department?
+Finance & Accounting,journal_entry,Create a journal entry for depreciation this month
+Finance & Accounting,tax_report,Generate a GST/VAT report for last quarter
+Finance & Accounting,bank_reconciliation,Reconcile the bank statement for account 1023 this month
+Finance & Accounting,financial_statement,Show me the profit and loss statement for Q3
+Finance & Accounting,financial_statement,Generate a balance sheet as of March 31
+Procurement,create_purchase_order,Create a purchase order for 100 units of raw material B from Vendor X
+Procurement,purchase_order_status,What is the status of purchase order PO-3321?
+Procurement,vendor_management,Add a new supplier to the vendor list
+Procurement,vendor_management,Show me the performance rating of Vendor Y
+Procurement,vendor_management,Which vendors have the best delivery timelines?
+Procurement,rfq,Send a request for quotation to three vendors for item Z
+Procurement,approval_workflow,Who needs to approve this purchase order?
+Procurement,approval_workflow,Why is my purchase requisition still pending approval?
+Procurement,goods_receipt,Record goods receipt for PO-3321
+Procurement,contract_management,When does our contract with Vendor X expire?
+Sales & CRM,create_sales_order,Create a sales order for customer John Enterprises
+Sales & CRM,order_status,What is the status of sales order SO-2201?
+Sales & CRM,order_status,Has order #6634 been shipped yet?
+Sales & CRM,customer_info,Show me the purchase history for customer ABC Corp
+Sales & CRM,customer_info,What is the credit limit for this customer?
+Sales & CRM,quotation,Generate a price quotation for 200 units of product C
+Sales & CRM,sales_report,Show me total sales for last month by region
+Sales & CRM,sales_report,Which product had the highest sales this quarter?
+Sales & CRM,lead_management,Add a new sales lead from the trade show
+Sales & CRM,discount_approval,Can I apply a 15% discount on this order?
+Human Resources,employee_info,What is the leave balance for employee ID 4021?
+Human Resources,employee_info,Show me the attendance record for last month
+Human Resources,leave_request,I want to apply for 3 days of sick leave
+Human Resources,leave_request,What is the status of my leave application?
+Human Resources,payroll,When is the payroll processed this month?
+Human Resources,payroll,Generate payslip for employee John Doe for August
+Human Resources,onboarding,Start the onboarding process for a new hire
+Human Resources,performance_review,Schedule a performance review for the sales team
+Human Resources,recruitment,How many open positions do we have in engineering?
+Production & Manufacturing,production_order,Create a production order for 500 units of product D
+Production & Manufacturing,production_status,What is the status of production order PROD-1123?
+Production & Manufacturing,bom_management,Show me the bill of materials for product E
+Production & Manufacturing,machine_downtime,Log a machine downtime event for Line 2
+Production & Manufacturing,quality_check,Record quality inspection results for batch #7781
+Production & Manufacturing,capacity_planning,What is our production capacity for next month?
+Production & Manufacturing,material_requirement,Calculate material requirements for the next production run
+Reporting & Analytics,dashboard_overview,Show me a summary dashboard of today's operations
+Reporting & Analytics,kpi_report,What are our key performance indicators this month?
+Reporting & Analytics,custom_report,Generate a custom report comparing sales and inventory turnover
+Reporting & Analytics,export_data,Export this report to Excel
+Reporting & Analytics,trend_analysis,Show me a trend analysis of revenue over the last 12 months
+System & User Management,user_access,I need access to the finance module
+System & User Management,user_access,How do I reset my ERP login password?
+System & User Management,role_permission,Can you change my role from Viewer to Editor?
+System & User Management,module_navigation,How do I navigate to the inventory module?
+System & User Management,notification_settings,Turn off email notifications for low stock alerts
+System & User Management,help_general,I'm not sure how to use this feature, can you guide me?
+System & User Management,help_general,What can this chatbot help me with?
+General,greeting,Hi, I need some help with the system
+General,greeting,Hello, are you there?
+General,escalation,I want to talk to a human support agent
+General,escalation,This isn't solving my issue, can I get a callback?
+General,feedback,I want to report a bug in the system
+General,feedback,This feature is really helpful, thanks

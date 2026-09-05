@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metric Qube CRM - Master Handover & Operational Manual</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        h1, h2, h3 {
+            color: #1a365d;
+        }
+        h1 {
+            border-bottom: 3px solid #3182ce;
+            padding-bottom: 10px;
+            font-size: 26px;
+            text-align: center;
+        }
+        h2 {
+            border-bottom: 2px solid #3182ce;
+            padding-bottom: 6px;
+            margin-top: 30px;
+            font-size: 18px;
+        }
+        h3 {
+            font-size: 15px;
+            color: #2b6cb0;
+            margin-top: 20px;
+            margin-bottom: 5px;
+        }
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .meta-table th, .meta-table td {
+            border: 1px solid #cbd5e0;
+            padding: 10px;
+            text-align: left;
+        }
+        .meta-table th {
+            background-color: #f7fafc;
+            width: 30%;
+        }
+        .feature-box {
+            background-color: #f8fafc;
+            border-left: 4px solid #3182ce;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            border-radius: 4px;
+            background-color: #e2e8f0;
+            color: #4a5568;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+        ul, ol {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        @media print {
+            body { padding: 20px; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="no-print" style="background-color: #ebf8ff; padding: 15px; border: 1px solid #bee3f8; border-radius: 6px; margin-bottom: 30px; text-align: center;">
+        <strong>📄 Export to PDF:</strong> Press <strong>Ctrl + P</strong> (Windows) or <strong>Cmd + P</strong> (Mac) in your browser and select "Save as PDF" to generate the document.
+    </div>
+
+    <h1>METRIC QUBE CRM<br><span style="font-size: 15px; color: #4a5568; font-weight: normal;">Master End-User Operations Manual & Client Handover Guide</span></h1>
+
+    <table class="meta-table">
+        <tr>
+            <th>Product Name</th>
+            <td>Metric Qube CRM System</td>
+        </tr>
+        <tr>
+            <th>Operational Manual Coverage</th>
+            <td>All Sidebar Modules, Employee Portal Flows, and Admin Operations</td>
+        </tr>
+        <tr>
+            <th>Platform Guard</th>
+            <td>Multi-role Secure Authorization (Admin / Employee / Technician / Marketing)</td>
+        </tr>
+    </table>
+
+    <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+
+    <h2>1. Employee Registration & User Role Management</h2>
+    <p>Admin manages users under the **Employees** menu inside the sidebar.</p>
+    <h3>How to Add a New Employee / User:</h3>
+    <ol>
+        <li>Navigate to the **Employees** menu and click **Add Employee**.</li>
+        <li>Fill in the employee's **Name**, **Email**, **Phone**, and secure login **Password**.</li>
+        <li><strong>Role Mapping:</strong> Assign one of the following roles from the dropdown:
+            <ul>
+                <li><strong>Admin:</strong> Complete system access, system configuration changes, backup/restore, and approval overrides.</li>
+                <li><strong>Business User:</strong> High-level manager. Evaluates dashboards, prints reports, and validates billing accounts. Bypasses core configurations.</li>
+                <li><strong>Employee:</strong> Backoffice operations executive. Manages customer updates, tickets, and coordinates field worker logs.</li>
+                <li><strong>Field Technician:</strong> Mobile-view access to LMC, pipeline measurements, and guided installation upload cards.</li>
+                <li><strong>Field Marketing:</strong> Schedules initial visits, registers prospects, and maps leads.</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h2>2. CRM & Customer Administration</h2>
+    <p>Customer entries can be created manually or uploaded in bulk.</p>
+    <h3>Method A: Manual Addition</h3>
+    <ol>
+        <li>Go to **Customers** and click **Add Customer**.</li>
+        <li>Input core details: **Customer Name**, **Phone**, **Email**, **Society Name**, and **Street Address**.</li>
+        <li><strong>Auto-assignment:</strong> If a default contractor is mapped to the chosen society, the CRM will automatically route the customer to that contractor.</li>
+    </ol>
+    <h3>Method B: Excel Import</h3>
+    <ol>
+        <li>Click the **Import Customers** button on the customer directory index.</li>
+        <li>Upload your Excel sheet (the system supports standard columns mapping CRN No, BP ID, Address, Meter Serial, and LMC dates).</li>
+    </ol>
+
+    <div class="page-break"></div>
+
+    <h2>3. Master Sidebar Directory Breakdown (All Modules)</h2>
+    <p>Here is the detailed function of every sidebar menu link in the CRM:</p>
+
+    <table class="meta-table" style="font-size: 13px;">
+        <thead>
+            <tr style="background-color: #cbd5e0;">
+                <th>Sidebar Menu Section</th>
+                <th>Menu Link</th>
+                <th>Description & Functionality</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Dashboard</strong></td>
+                <td>Dashboard</td>
+                <td>Provides high-level analytical counters of active installations, pending tickets, and financial balances.</td>
+            </tr>
+            <tr style="background-color: #f7fafc;">
+                <td rowspan="6" style="font-weight: bold; color: #1a365d;">CRM</td>
+                <td>Customers</td>
+                <td>Manage consumer accounts database. Handles Excel import/export and coordinators assignment.</td>
+            </tr>
+            <tr>
+                <td>Societies</td>
+                <td>Master residential complexes directory. Map default contractors for auto-routing new customers.</td>
+            </tr>
+            <tr>
+                <td>Confirmed Appointments</td>
+                <td>Technician visit schedule database. Features AI Smart Scheduler to group visits by society.</td>
+            </tr>
+            <tr>
+                <td>Burner Types</td>
+                <td>List of burner types (e.g. Normal, Hob Stove) mapped at employee creation.</td>
+            </tr>
+            <tr>
+                <td>Meter Types</td>
+                <td>Registry of authorized meter models.</td>
+            </tr>
+            <tr>
+                <td>Contractors</td>
+                <td>Subcontractor firms database carrying out pipe/meter installations.</td>
+            </tr>
+            <tr style="background-color: #f7fafc;">
+                <td rowspan="6" style="font-weight: bold; color: #1a365d;">BILLING</td>
+                <td>Client POs (WO)</td>
+                <td>Record work orders received from clients and track execution with date filters.</td>
+            </tr>
+            <tr>
+                <td>Vendor POs</td>
+                <td>Issue POs to suppliers with auto-generated format (`MQ/MonthYear/0001`).</td>
+            </tr>
+            <tr>
+                <td>Vendor Invoices</td>
+                <td>Bypasses 3-way check for direct payments (rent, electricity), runs 3-way checks for POs, and handles payments.</td>
+            </tr>
+            <tr>
+                <td>Quotations</td>
+                <td>Draft proposals and convert them to Sales Invoices in one click.</td>
+            </tr>
+            <tr>
+                <td>Sales Invoices</td>
+                <td>Raise invoices directly to clients and track payments.</td>
+            </tr>
+            <tr>
+                <td>Credit/Debit Notes</td>
+                <td>Post sales adjustments.</td>
+            </tr>
+            <tr style="background-color: #f7fafc;">
+                <td rowspan="6" style="font-weight: bold; color: #1a365d;">INVENTORY</td>
+                <td>Products & Services</td>
+                <td>Product catalogue containing HSN codes, default rates, and tax parameters.</td>
+            </tr>
+            <tr>
+                <td>Material Logs (In/Out)</td>
+                <td>Record stock inward shipments and outward material issuance to technicians.</td>
+            </tr>
+            <tr>
+                <td>FIM Reconciliation</td>
+                <td>Reconcile materials issued to technicians against what was actually installed.</td>
+            </tr>
+            <tr>
+                <td>Suppliers</td>
+                <td>Supplier master registry for vendor POs.</td>
+            </tr>
+            <tr>
+                <td>Clients</td>
+                <td>Manage clients master registry for sales invoicing.</td>
+            </tr>
+            <tr>
+                <td>Store Masters</td>
+                <td>Registry of physical storage warehouses.</td>
+            </tr>
+            <tr style="background-color: #f7fafc;">
+                <td rowspan="2" style="font-weight: bold; color: #1a365d;">OPERATIONS</td>
+                <td>Tasks</td>
+                <td>Assign field tasks to engineers and track progress.</td>
+            </tr>
+            <tr>
+                <td>Tickets</td>
+                <td>Customer support/installation complaints desk.</td>
+            </tr>
+            <tr style="background-color: #f7fafc;">
+                <td rowspan="2" style="font-weight: bold; color: #1a365d;">ACCOUNTS</td>
+                <td>Chart of Accounts</td>
+                <td>Master accounts registry (Assets, Liabilities, Equity, Expenses).</td>
+            </tr>
+            <tr>
+                <td>Journal Entries</td>
+                <td>Record financial manual double-entry transactions.</td>
+            </tr>
+            <tr style="background-color: #f7fafc;">
+                <td rowspan="5" style="font-weight: bold; color: #1a365d;">ADMIN</td>
+                <td>Employees</td>
+                <td>Manage employees, passwords, and permissions mapping.</td>
+            </tr>
+            <tr>
+                <td>Branches</td>
+                <td>Manage regional branch offices.</td>
+            </tr>
+            <tr>
+                <td>Reports</td>
+                <td>Generate financial and inventory audits (GST reports, sales ledgers, trial balance).</td>
+            </tr>
+            <tr>
+                <td>Settings</td>
+                <td>Define default tax rules, automation variables, and business details.</td>
+            </tr>
+            <tr>
+                <td>Backup & Restore</td>
+                <td>Database backup utility.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <h2>4. How the Employee & Technician Portal Works</h2>
+    <p>Field workers access a simplified mobile-friendly dashboard built specifically for on-site operations.</p>
+    
+    <h3>A. Field Technician Flow</h3>
+    <ol>
+        <li><strong>Login:</strong> Technicians log in using their credentials mapped under the **Field Technician** role.</li>
+        <li><strong>LMC Stage Photos:</strong> When visiting a customer to perform LMC, the technician updates the customer profile by uploading 5 specific guided photos. The CRM shows sample images on screen for assistance:
+            <ul>
+                <li><strong>Inside Kitchen Photo:</strong> Complete front view covering burner setup.</li>
+                <li><strong>Meter Dial Photo:</strong> A close-up of the meter dial showing initial numbers clearly.</li>
+                <li><strong>Outside Balcony Photo:</strong> External riser pipeline tapping segment.</li>
+                <li><strong>RFC & JMR Reports:</strong> Uploads of signed forms.</li>
+            </ul>
+        </li>
+        <li><strong>Appointment Audits & Videos:</strong> On the **Appointments** edit screen, technicians:
+            <ul>
+                <li>Select the **Burner Type** (<span class="badge">Normal</span> or <span class="badge">Hob Stove</span>).</li>
+                <li>Upload two short video clips: **Kitchen Setup Video** and **External Riser Pipe Video**.</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h3>B. Field Marketing Flow</h3>
+    <ol>
+        <li><strong>Lead Creation:</strong> Marketing executives register new societies, log customer interests, and record contact details on site.</li>
+        <li><strong>Scheduling visits:</strong> Marketing executives schedule visits that appear in the **Confirmed Appointments** directory for managers to assign.</li>
+    </ol>
+
+    <h3>C. Backoffice Operations Flow</h3>
+    <ol>
+        <li><strong>Reconciling Materials:</strong> Backoffice staff use the **FIM Reconciliation** panel to compare the number of meters/pipes checked out by a technician against what they actually installed at customer sites.</li>
+        <li><strong>Generating Invoices:</strong> Once the technician uploads JMR and LMC files, backoffice staff verify the details and generate GST-compliant invoices.</li>
+    </ol>
+
+</body>
+</html>
