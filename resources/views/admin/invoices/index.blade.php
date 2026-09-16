@@ -152,12 +152,16 @@
                             <td>
                                 <a href="{{ route('admin.invoices.show', $invoice) }}" class="fw-bold text-decoration-none" style="color: #2563eb;">{{ $invoice->invoice_no }}</a>
                                 <br>
-                                @if($invoice->invoice_type === 'without_gst')
-                                    <span class="badge bg-secondary" style="font-size: 0.65rem;">Without GST</span>
-                                @elseif($invoice->invoice_type === 'proforma')
-                                    <span class="badge bg-info" style="font-size: 0.65rem;">Proforma</span>
+                                @if($invoice->status === 'draft')
+                                    <span class="badge bg-secondary" style="font-size: 0.65rem;">Draft</span>
                                 @else
-                                    <span class="badge bg-primary" style="font-size: 0.65rem;">Tax Invoice</span>
+                                    @if($invoice->invoice_type === 'without_gst')
+                                        <span class="badge bg-secondary" style="font-size: 0.65rem;">Without GST</span>
+                                    @elseif($invoice->invoice_type === 'proforma')
+                                        <span class="badge bg-info" style="font-size: 0.65rem;">Proforma</span>
+                                    @else
+                                        <span class="badge bg-primary" style="font-size: 0.65rem;">Tax Invoice</span>
+                                    @endif
                                 @endif
                             </td>
                             <td>
@@ -179,7 +183,9 @@
                                 ₹{{ number_format($invoice->balance_due, 2) }}
                             </td>
                             <td class="text-center">
-                                @if($invoice->payment_status == 'paid')
+                                @if($invoice->status === 'draft')
+                                    <span class="badge rounded-pill px-3 py-1" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; font-weight:600; font-size:0.75rem;">Draft</span>
+                                @elseif($invoice->payment_status == 'paid')
                                     <span class="badge rounded-pill px-3 py-1" style="background:#dcfce7; color:#15803d; border:1px solid #86efac; font-weight:600; font-size:0.75rem;">Paid</span>
                                 @elseif($invoice->payment_status == 'partial')
                                     <span class="badge rounded-pill px-3 py-1" style="background:#fef3c7; color:#b45309; border:1px solid #fcd34d; font-weight:600; font-size:0.75rem;">Partial</span>
@@ -189,24 +195,30 @@
                             </td>
                             <td class="text-end pe-4">
                                 <div class="d-inline-flex gap-1 align-items-center">
-                                    <a href="{{ route('admin.invoices.show', $invoice) }}" class="btn btn-sm btn-light text-primary border" title="View GST Invoice">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{{ route('admin.invoices.pdf', $invoice) }}" class="btn btn-sm btn-light text-danger border" title="Download GST Bill PDF" target="_blank">
-                                        <i class="fas fa-file-pdf"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-sm btn-light text-success border open-wa-modal" 
-                                            data-phone="{{ $invoice->customer->phone ?? '' }}"
-                                            data-name="{{ $invoice->customer->name ?? 'Customer' }}"
-                                            data-no="{{ $invoice->invoice_no }}"
-                                            data-date="{{ $invoice->invoice_date->format('d M Y') }}"
-                                            data-total="₹{{ number_format($invoice->total, 2) }}"
-                                            data-status="{{ strtoupper($invoice->payment_status) }}"
-                                            data-balance="₹{{ number_format($invoice->balance_due, 2) }}"
-                                            data-pdf="{{ route('admin.invoices.pdf', $invoice) }}"
-                                            title="Send GST Bill on WhatsApp">
-                                        <i class="fab fa-whatsapp"></i>
-                                    </button>
+                                    @if($invoice->status === 'draft')
+                                        <a href="{{ route('admin.invoices.edit', $invoice) }}" class="btn btn-sm btn-light text-warning border" title="Edit Draft">
+                                            <i class="fas fa-edit"></i> Edit Draft
+                                        </a>
+                                    @else
+                                        <a href="{{ route('admin.invoices.show', $invoice) }}" class="btn btn-sm btn-light text-primary border" title="View GST Invoice">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ route('admin.invoices.pdf', $invoice) }}" class="btn btn-sm btn-light text-danger border" title="Download GST Bill PDF" target="_blank">
+                                            <i class="fas fa-file-pdf"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-light text-success border open-wa-modal" 
+                                                data-phone="{{ $invoice->customer->phone ?? '' }}"
+                                                data-name="{{ $invoice->customer->name ?? 'Customer' }}"
+                                                data-no="{{ $invoice->invoice_no }}"
+                                                data-date="{{ $invoice->invoice_date->format('d M Y') }}"
+                                                data-total="₹{{ number_format($invoice->total, 2) }}"
+                                                data-status="{{ strtoupper($invoice->payment_status) }}"
+                                                data-balance="₹{{ number_format($invoice->balance_due, 2) }}"
+                                                data-pdf="{{ route('admin.invoices.pdf', $invoice) }}"
+                                                title="Send GST Bill on WhatsApp">
+                                            <i class="fab fa-whatsapp"></i>
+                                        </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

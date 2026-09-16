@@ -24,8 +24,8 @@ class QuotationController extends Controller
 
     public function create()
     {
-        $customers = Customer::all();
-        $products = Product::all();
+        $customers = Customer::all()->unique('name');
+        $products = Product::all()->unique('name');
         $quotationNo = $this->generateQuotationNumber();
         
         return view('admin.quotations.create', compact('customers', 'products', 'quotationNo'));
@@ -172,8 +172,8 @@ class QuotationController extends Controller
                 ->with('error', 'Status for Quotation #' . $quotation->quotation_no . ' is locked and cannot be changed again.');
         }
 
-        $customers = Customer::all();
-        $products = Product::all();
+        $customers = Customer::all()->unique('name');
+        $products = Product::all()->unique('name');
         $quotation->load('items');
         
         return view('admin.quotations.edit', compact('quotation', 'customers', 'products'));

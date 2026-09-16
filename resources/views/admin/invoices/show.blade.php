@@ -193,7 +193,6 @@
                     </div>
                     @endif
 
-                    @if($invoice->include_payment_info)
                     <div class="card mb-3 border-info">
                         <div class="card-header bg-info text-white py-2 text-center">
                             <strong><i class="fas fa-qrcode me-1"></i> Scan to Pay</strong>
@@ -219,7 +218,6 @@
                             </div>
                         </div>
                     </div>
-                    @endif
                 </div>
             </div>
 

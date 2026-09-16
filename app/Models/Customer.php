@@ -206,6 +206,9 @@ class Customer extends Model
                         'status' => 'done',
                         'completed_at' => now()
                     ]);
+                    
+                // Auto-deduct inventory products required by the customer
+                $customer->fulfillProductRequirements();
             }
 
             // Sync contractor assignment when society changes
@@ -285,5 +288,55 @@ class Customer extends Model
     public function leads()
     {
         return $this->hasMany(Lead::class);
+    }
+
+    /**
+     * Auto-deduct products required for customer installation
+     */
+    public function fulfillProductRequirements()
+    {
+        $requirements = [
+            'mlc_pipe_length' => 'MLC Pipe',
+            'male_union'      => 'Male Union',
+            'female_union'    => 'Female Union',
+            'isolation_valve' => 'Isolation Valve',
+        ];
+
+        foreach ($requirements as $attribute => $productName) {
+            $quantity = (float) $this->{$attribute};
+            if ($quantity > 0) {
+                // Find or create the product if it doesn't exist
+                $product = \App\Models\Product::firstOrCreate(
+                    ['name' => $productName],
+                    [
+                        'sku' => strtoupper(str_replace(' ', '_', $productName)) . '-' . uniqid(),
+                        'category' => 'Fittings',
+                        'unit' => $attribute === 'mlc_pipe_length' ? 'meters' : 'pcs',
+                        'type' => 'material',
+                        'inventory_type' => 'inventory',
+                        'current_stock' => 0,
+                    ]
+                );
+
+                // Get default warehouse
+                $warehouseId = \App\Models\Warehouse::first()->id ?? 1;
+
+                // Create stock out transaction
+                \App\Models\StockTransaction::create([
+                    'product_id' => $product->id,
+                    'warehouse_id' => $warehouseId,
+                    'type' => 'out',
+                    'quantity' => $quantity,
+                    'reference_no' => 'CUST-CONV-' . $this->id,
+                    'notes' => 'Auto-deducted for customer conversion: ' . $this->name,
+                    'created_by' => auth()->id() ?? 1,
+                    'approved_by' => auth()->id() ?? 1,
+                    'approved_at' => now(),
+                ]);
+
+                // Deduct stock
+                $product->decrement('current_stock', $quantity);
+            }
+        }
     }
 }

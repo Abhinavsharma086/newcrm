@@ -68,7 +68,20 @@
                             <div class="col-md-6">
                                 <table class="table table-borderless table-sm">
                                     <tr><th style="width: 30%;" class="text-secondary">Society:</th><td>{{ $customer->society ?? 'N/A' }}</td></tr>
-                                    <tr><th class="text-secondary">Address:</th><td>{{ $customer->address ?? 'N/A' }}</td></tr>
+                                    <tr>
+                                        <th class="text-secondary">Address:</th>
+                                        <td>
+                                            {{ $customer->address ?? 'N/A' }}
+                                            @if($customer->address || $customer->city)
+                                                @php
+                                                    $mapQuery = urlencode(trim(implode(', ', array_filter([$customer->address, $customer->society, $customer->city, $customer->state, $customer->pin]))));
+                                                @endphp
+                                                <a href="https://www.google.com/maps/search/?api=1&query={{ $mapQuery }}" target="_blank" class="btn btn-xs btn-outline-success ms-2 py-0" title="View on Google Maps">
+                                                    <i class="fas fa-map-marker-alt"></i> Map
+                                                </a>
+                                            @endif
+                                        </td>
+                                    </tr>
                                     <tr><th class="text-secondary">City:</th><td>{{ $customer->city ?? 'N/A' }}</td></tr>
                                     <tr><th class="text-secondary">State:</th><td>{{ $customer->state ?? 'N/A' }}</td></tr>
                                     <tr><th class="text-secondary">PIN Code:</th><td>{{ $customer->pin ?? 'N/A' }}</td></tr>

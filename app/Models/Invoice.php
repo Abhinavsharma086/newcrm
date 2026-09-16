@@ -13,9 +13,10 @@ class Invoice extends Model
     use HasFactory, SoftDeletes, LogsActivity;
 
     protected $fillable = [
-        'invoice_no', 'customer_id', 'client_id', 'client_po_id', 'quotation_id', 'invoice_date', 'due_date',
+        'invoice_no', 'status', 'customer_id', 'biller_id', 'client_id', 'client_po_id', 'quotation_id', 'invoice_date', 'due_date',
         'subtotal', 'cgst', 'sgst', 'igst', 'total', 'payment_status',
-        'paid_amount', 'notes', 'include_payment_info', 'bank_name', 'bank_account_name', 'bank_account_number', 'bank_ifsc', 'upi_id', 'upi_qr_image', 'created_by', 'branch_id'
+        'paid_amount', 'notes', 'include_payment_info', 'bank_name', 'bank_account_name', 'bank_account_number', 'bank_ifsc', 'upi_id', 'upi_qr_image', 'created_by', 'branch_id',
+        'billing_name', 'billing_address', 'billing_gstin', 'shipping_name', 'shipping_address', 'shipping_gstin'
     ];
 
     protected function casts(): array
@@ -58,6 +59,11 @@ class Invoice extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function biller()
+    {
+        return $this->belongsTo(Customer::class, 'biller_id');
     }
 
     public function client()

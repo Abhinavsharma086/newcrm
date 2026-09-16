@@ -9,20 +9,7 @@
     <h2 class="mb-4">Reports</h2>
 
     <div class="row g-4">
-        <div class="col-md-4">
-            <div class="card h-100 text-center p-4">
-                <div class="mb-3">
-                    <div class="icon-box red mx-auto" style="width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;">
-                        <i class="fas fa-percent fa-lg text-white"></i>
-                    </div>
-                </div>
-                <h5>GST Summary</h5>
-                <p class="text-muted small">CGST / SGST / IGST monthly breakdown with invoice details</p>
-                <a href="{{ route('admin.reports.gst-summary') }}" class="btn btn-primary mt-auto">
-                    <i class="fas fa-arrow-right"></i> View Report
-                </a>
-            </div>
-        </div>
+
 
         <div class="col-md-4">
             <div class="card h-100 text-center p-4">

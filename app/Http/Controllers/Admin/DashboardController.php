@@ -36,6 +36,7 @@ class DashboardController extends Controller
         // Monthly Revenue Chart Data
         $driver = DB::connection()->getDriverName();
         $monthExpr = $driver === 'sqlite' ? 'strftime("%Y-%m", invoice_date)' : 'DATE_FORMAT(invoice_date, "%Y-%m")';
+        $monthExprCust = $driver === 'sqlite' ? 'strftime("%Y-%m", created_at)' : 'DATE_FORMAT(created_at, "%Y-%m")';
 
         $monthlyRevenue = Invoice::where('payment_status', 'paid')
             ->where('invoice_date', '>=', now()->subMonths(6))
@@ -44,10 +45,17 @@ class DashboardController extends Controller
             ->orderBy('month')
             ->get();
 
+        $monthlyCustomers = Customer::where('created_at', '>=', now()->subMonths(6))
+            ->selectRaw("$monthExprCust as month, COUNT(id) as count")
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
         // Recent Activities
         $recentInvoices = Invoice::with('customer')->latest()->take(5)->get();
         $recentTickets = Ticket::with('customer', 'assignee')->latest()->take(5)->get();
+        $recentCustomers = Customer::with('assignee')->latest()->take(5)->get();
 
-        return view('admin.dashboard', compact('stats', 'monthlyRevenue', 'recentInvoices', 'recentTickets'));
+        return view('admin.dashboard', compact('stats', 'monthlyRevenue', 'monthlyCustomers', 'recentInvoices', 'recentTickets', 'recentCustomers'));
     }
 }

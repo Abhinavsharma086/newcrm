@@ -25,6 +25,7 @@
                     <th>Phone</th>
                     <th>Department</th>
                     <th>Role</th>
+                    <th>Total Tasks</th>
                     <th>Status</th>
                     <th>Actions</th>
                 </tr>
@@ -40,6 +41,9 @@
                         @foreach($employee->roles as $role)
                         <span class="badge bg-secondary">{{ $role->name }}</span>
                         @endforeach
+                    </td>
+                    <td>
+                        <span class="badge bg-primary rounded-pill px-3">{{ $employee->assigned_tasks_count }}</span>
                     </td>
                     <td>
                         <span class="badge bg-{{ $employee->status == 'active' ? 'success' : 'danger' }}">

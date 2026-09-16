@@ -98,4 +98,45 @@ class InvoiceService
             'total' => $total,
         ]);
     }
+
+    public function updateInvoice(Invoice $invoice, $data, $items)
+    {
+        return DB::transaction(function () use ($invoice, $data, $items) {
+            $invoice->update($data);
+            
+            // Delete old items
+            $invoice->items()->delete();
+            
+            foreach ($items as $item) {
+                $product = Product::find($item['product_id']);
+                $customerState = $invoice->customer ? $invoice->customer->state : ($invoice->client ? $invoice->client->address : 'Delhi');
+                $companyState = config('app.company_state', 'Delhi');
+                
+                $lineTotal = $item['quantity'] * $item['unit_price'];
+                
+                if (isset($data['invoice_type']) && $data['invoice_type'] === 'without_gst') {
+                    $gst = ['cgst' => 0, 'sgst' => 0, 'igst' => 0, 'total_tax' => 0];
+                } else {
+                    $gst = $this->gstService->calculateGst($lineTotal, $product ? $product->tax_rate : 0, $customerState, $companyState);
+                }
+                
+                $invoice->items()->create([
+                    'product_id' => $item['product_id'],
+                    'description' => $item['description'] ?? ($product ? $product->name : ''),
+                    'hsn_code' => $product ? $product->hsn_code : null,
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'tax_rate' => $product ? $product->tax_rate : 0,
+                    'cgst' => $gst['cgst'],
+                    'sgst' => $gst['sgst'],
+                    'igst' => $gst['igst'],
+                    'total' => $lineTotal + $gst['total_tax'],
+                ]);
+            }
+            
+            $this->recalculateInvoice($invoice->fresh());
+            
+            return $invoice->fresh();
+        });
+    }
 }

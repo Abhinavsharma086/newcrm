@@ -107,6 +107,30 @@ class ChatbotController extends Controller
         if (preg_match('/^(task|tasks|kaam)\s*(.*)$/i', $query, $m)) {
             return ['intent' => 'pending_tasks', 'identifier' => trim($m[2]), 'id_type' => 'name', 'raw' => $query];
         }
+        if (preg_match('/^(store|warehouse)s?\s*(.*)$/i', $query, $m)) {
+            return ['intent' => 'warehouse_lookup', 'identifier' => trim($m[2]), 'id_type' => 'name', 'raw' => $query];
+        }
+        if (preg_match('/^(account|chart of accounts?)\s*(.*)$/i', $query, $m)) {
+            return ['intent' => 'account_lookup', 'identifier' => trim($m[2]), 'id_type' => 'name', 'raw' => $query];
+        }
+        if (preg_match('/^(journal|journal entry|entries)\s*(.*)$/i', $query, $m)) {
+            return ['intent' => 'journal_entry_lookup', 'identifier' => trim($m[2]), 'id_type' => 'name', 'raw' => $query];
+        }
+        if (preg_match('/^(branch|branches)\s*(.*)$/i', $query, $m)) {
+            return ['intent' => 'branch_lookup', 'identifier' => trim($m[2]), 'id_type' => 'name', 'raw' => $query];
+        }
+        if (preg_match('/^(burner|burner type)s?\s*(.*)$/i', $query, $m)) {
+            return ['intent' => 'burner_type_lookup', 'identifier' => trim($m[2]), 'id_type' => 'name', 'raw' => $query];
+        }
+        if (preg_match('/^(meter type|meter)s?\s*(.*)$/i', $query, $m)) {
+            return ['intent' => 'meter_type_lookup', 'identifier' => trim($m[2]), 'id_type' => 'name', 'raw' => $query];
+        }
+        if (preg_match('/^(client)s?\s*(.*)$/i', $query, $m)) {
+            return ['intent' => 'client_lookup', 'identifier' => trim($m[2]), 'id_type' => 'name', 'raw' => $query];
+        }
+        if (preg_match('/^(report)s?\s*(.*)$/i', $query, $m)) {
+            return ['intent' => 'report_lookup', 'identifier' => trim($m[2]), 'id_type' => 'name', 'raw' => $query];
+        }
 
         // ── Invoice number pattern: INV-XXXX or INV/XXXX ───────────────────
         if (preg_match('/\b(INV[-\/]\S+)\b/i', $query, $m)) {
@@ -594,6 +618,86 @@ class ChatbotController extends Controller
                     ];
                 });
                 return response()->json(['type' => 'multiple', 'message' => "Yeh products mile:", 'list' => $list]);
+            }
+
+            // ── Branch Lookup ────────────────────────────────────────────────────────
+            if ($intent === 'branch_lookup') {
+                $branches = \App\Models\Branch::where('name', 'LIKE', '%' . $identifier . '%')->limit(10)->get();
+                if ($branches->isEmpty()) return $this->notFound($query, $userId, $startTime, $request, "Branch '$identifier' nahi mili.");
+                $list = $branches->map(function ($b) {
+                    return [
+                        'id'         => $b->id,
+                        'name'       => $b->name,
+                        'title'      => 'Code: ' . $b->branch_code,
+                        'stage'      => 'Active',
+                        'url'        => route('admin.branches.index', ['id' => $b->id]),
+                    ];
+                });
+                return response()->json(['type' => 'multiple', 'message' => "Yeh branches mili:", 'list' => $list]);
+            }
+
+            // ── Warehouse / Store Lookup ──────────────────────────────────────────────
+            if ($intent === 'warehouse_lookup') {
+                $warehouses = \App\Models\Warehouse::where('name', 'LIKE', '%' . $identifier . '%')->limit(10)->get();
+                if ($warehouses->isEmpty()) return $this->notFound($query, $userId, $startTime, $request, "Store/Warehouse '$identifier' nahi mila.");
+                $list = $warehouses->map(function ($w) {
+                    return [
+                        'id'         => $w->id,
+                        'name'       => $w->name,
+                        'title'      => 'Location: ' . $w->location,
+                        'stage'      => 'Active',
+                        'url'        => route('admin.warehouses.index', ['id' => $w->id]),
+                    ];
+                });
+                return response()->json(['type' => 'multiple', 'message' => "Yeh stores mile:", 'list' => $list]);
+            }
+
+            // ── Chart of Accounts Lookup ──────────────────────────────────────────────
+            if ($intent === 'account_lookup') {
+                $accounts = \App\Models\Account::where('name', 'LIKE', '%' . $identifier . '%')->orWhere('code', 'LIKE', '%' . $identifier . '%')->limit(10)->get();
+                if ($accounts->isEmpty()) return $this->notFound($query, $userId, $startTime, $request, "Account '$identifier' nahi mila.");
+                $list = $accounts->map(function ($a) {
+                    return [
+                        'id'         => $a->id,
+                        'name'       => $a->name,
+                        'title'      => 'Code: ' . $a->code,
+                        'stage'      => $a->type,
+                        'url'        => route('admin.accounts.index', ['id' => $a->id]),
+                    ];
+                });
+                return response()->json(['type' => 'multiple', 'message' => "Yeh accounts mile:", 'list' => $list]);
+            }
+
+            // ── Journal Entry Lookup ──────────────────────────────────────────────────
+            if ($intent === 'journal_entry_lookup') {
+                $entries = \App\Models\JournalEntry::where('entry_number', 'LIKE', '%' . $identifier . '%')->limit(10)->get();
+                if ($entries->isEmpty()) return $this->notFound($query, $userId, $startTime, $request, "Journal Entry '$identifier' nahi mili.");
+                $list = $entries->map(function ($e) {
+                    return [
+                        'id'         => $e->id,
+                        'name'       => 'Entry: ' . $e->entry_number,
+                        'title'      => 'Amount: ₹' . $e->total_amount,
+                        'stage'      => 'Date: ' . $e->entry_date,
+                        'url'        => route('admin.journal-entries.index', ['id' => $e->id]),
+                    ];
+                });
+                return response()->json(['type' => 'multiple', 'message' => "Yeh journal entries mili:", 'list' => $list]);
+            }
+
+            // ── Client Lookup ────────────────────────────────────────────────────────
+            if ($intent === 'client_lookup') {
+                $clients = \App\Models\Client::where('name', 'LIKE', '%' . $identifier . '%')->limit(10)->get();
+                if ($clients->isEmpty()) return $this->notFound($query, $userId, $startTime, $request, "Client '$identifier' nahi mila.");
+                $list = $clients->map(function ($c) {
+                    return [
+                        'id'         => $c->id,
+                        'name'       => $c->name,
+                        'title'      => 'Email: ' . $c->email,
+                        'stage'      => 'Active',
+                        'url'        => route('admin.clients.index', ['id' => $c->id]),
+                    ];
+                });
+                return response()->json(['type' => 'multiple', 'message' => "Yeh clients mile:", 'list' => $list]);
             }
 
             // ── Vendor PO Lookup ──────────────────────────────────────────────────────

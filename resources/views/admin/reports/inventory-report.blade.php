@@ -66,7 +66,6 @@
                             <th>Product</th>
                             <th class="text-end">Current Stock</th>
                             <th class="text-end">Min Stock Level</th>
-                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -76,11 +75,6 @@
                             <td>{{ $product->name }}</td>
                             <td class="text-end text-danger">{{ $product->current_stock }}</td>
                             <td class="text-end">{{ $product->min_stock_level }}</td>
-                            <td>
-                                <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-sm btn-primary">
-                                    Restock
-                                </a>
-                            </td>
                         </tr>
                         @endforeach
                     </tbody>

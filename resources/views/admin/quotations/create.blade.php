@@ -25,7 +25,7 @@
                                     <div class="input-group">
                                         <input type="text" class="form-control font-monospace @error('customer_gstin') is-invalid @enderror" 
                                                id="customer_gstin" name="customer_gstin" value="{{ old('customer_gstin') }}" 
-                                               placeholder="e.g. 08AATFH4878A1Z0" maxlength="18" style="text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">
+                                               placeholder="e.g. 08AATFH4878A1Z0" maxlength="15" style="text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">
                                         <button class="btn btn-primary px-3" type="button" id="btnFetchGst" onclick="triggerGstLookup()">
                                             <i class="fas fa-bolt me-1"></i> Fetch GST Details
                                         </button>
@@ -294,7 +294,7 @@ function triggerGstLookup() {
     let gstin = input.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
     input.value = gstin;
     
-    if (gstin.length < 15) {
+    if (gstin.length !== 15) {
         alert('Please enter a valid 15-character GST Number.');
         return;
     }

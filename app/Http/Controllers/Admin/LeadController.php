@@ -18,7 +18,7 @@ class LeadController extends Controller
 
     public function create()
     {
-        $customers = Customer::all();
+        $customers = Customer::all()->unique('name');
         $employees = User::where('status', 'active')->get();
         return view('admin.leads.create', compact('customers', 'employees'));
     }
@@ -59,8 +59,9 @@ class LeadController extends Controller
 
     public function edit(Lead $lead)
     {
-        $customers = Customer::all();
+        $customers = Customer::all()->unique('name');
         $employees = User::where('status', 'active')->get();
+        $lead->load('customer');
         return view('admin.leads.edit', compact('lead', 'customers', 'employees'));
     }
 

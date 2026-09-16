@@ -50,9 +50,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/customers/export', [Admin\CustomerController::class, 'export'])->name('customers.export');
         Route::post('/customers/import', [Admin\CustomerController::class, 'import'])->name('customers.import');
         Route::post('/customers/assignment-settings', [Admin\CustomerController::class, 'updateAssignmentSettings'])->name('customers.assignment-settings');
+        Route::post('/customers/store-ajax', [Admin\CustomerController::class, 'storeAjax'])->name('customers.store-ajax');
         Route::resource('customers', Admin\CustomerController::class);
         
         // Societies Master List
+        Route::get('societies/customers', [Admin\SocietyController::class, 'getCustomers'])->name('societies.customers');
         Route::resource('societies', Admin\SocietyController::class);
         
         // Appointment Management
@@ -110,6 +112,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('vendor-invoices', Admin\VendorInvoiceController::class);
         Route::post('vendor-invoices/{vendor_invoice}/approve', [Admin\VendorInvoiceController::class, 'approve'])->name('vendor-invoices.approve');
         Route::post('vendor-invoices/{vendor_invoice}/payment', [Admin\VendorInvoiceController::class, 'recordPayment'])->name('vendor-invoices.record-payment');
+
         
         // Accounting
         Route::prefix('accounts')->name('accounts.')->group(function () {

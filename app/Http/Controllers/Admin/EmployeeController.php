@@ -12,7 +12,7 @@ class EmployeeController extends Controller
 {
     public function index()
     {
-        $employees = User::with('roles')->latest()->get();
+        $employees = User::with('roles')->withCount('assignedTasks')->latest()->get();
         return view('admin.employees.index', compact('employees'));
     }
 

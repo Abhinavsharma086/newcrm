@@ -18,7 +18,7 @@ class TicketController extends Controller
 
     public function create()
     {
-        $customers = Customer::all();
+        $customers = Customer::all()->unique('name');
         $employees = User::where('status', 'active')->get();
         $ticketNo = 'TKT-' . date('Ymd') . '-' . str_pad(Ticket::count() + 1, 4, '0', STR_PAD_LEFT);
         
@@ -72,7 +72,7 @@ class TicketController extends Controller
 
     public function edit(Ticket $ticket)
     {
-        $customers = Customer::all();
+        $customers = Customer::all()->unique('name');
         $employees = User::where('status', 'active')->get();
         return view('admin.tickets.edit', compact('ticket', 'customers', 'employees'));
     }

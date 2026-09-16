@@ -102,13 +102,13 @@
             </div>
 
             <div class="row">
-                <div class="col-md-4 mb-3">
+                <div class="col-md-3 mb-3">
                     <label for="price" class="form-label">Price (₹) <span class="text-danger">*</span></label>
                     <input type="number" step="0.01" class="form-control @error('price') is-invalid @enderror" 
                            id="price" name="price" value="{{ old('price', $product->price) }}" required>
                 </div>
 
-                <div class="col-md-4 mb-3">
+                <div class="col-md-3 mb-3">
                     <label for="tax_rate" class="form-label">GST Rate (%) <span class="text-danger">*</span></label>
                     <select class="form-select @error('tax_rate') is-invalid @enderror" id="tax_rate" name="tax_rate" required>
                         <option value="0" {{ old('tax_rate', $product->tax_rate) == '0' ? 'selected' : '' }}>0%</option>
@@ -119,10 +119,16 @@
                     </select>
                 </div>
 
-                <div class="col-md-4 mb-3">
+                <div class="col-md-3 mb-3">
                     <label for="reorder_level" class="form-label">Reorder Level <span class="text-danger">*</span></label>
                     <input type="number" class="form-control @error('reorder_level') is-invalid @enderror" 
                            id="reorder_level" name="reorder_level" value="{{ old('reorder_level', $product->reorder_level) }}" required>
+                </div>
+
+                <div class="col-md-3 mb-3">
+                    <label for="current_stock" class="form-label">Current Stock <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control @error('current_stock') is-invalid @enderror" 
+                           id="current_stock" name="current_stock" value="{{ old('current_stock', $product->current_stock) }}" required>
                 </div>
             </div>
 

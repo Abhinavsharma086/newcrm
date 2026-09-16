@@ -62,7 +62,7 @@ class ReportController extends Controller
         }
 
         $invoices = $query->get();
-        $customers = Customer::all();
+        $customers = Customer::all()->unique('name');
 
         $summary = [
             'total_invoices' => $invoices->count(),

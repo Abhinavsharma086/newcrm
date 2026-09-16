@@ -439,7 +439,6 @@
                         {{ ucwords(numToWords($invoice->total ?? 0)) }} RUPEES ONLY
                     </div>
                     
-                    @if(isset($invoice->include_payment_info) && $invoice->include_payment_info)
                     <div style="border-bottom: 1px solid #000; padding: 4px; text-align: center; font-weight: bold; font-size: 9px; background-color: #f9f9f9;">Scan to Pay</div>
                     <div style="padding: 10px; text-align: center;">
                         @php
@@ -466,7 +465,6 @@
                         </div>
                         @endif
                     </div>
-                    @endif
                     
                     <div class="section-heading" style="border-top: 1px solid #000;">Terms and Conditions</div>
                     <div class="terms-box">

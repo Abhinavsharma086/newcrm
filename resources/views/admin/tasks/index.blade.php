@@ -28,9 +28,9 @@
     <div class="card border-0 shadow-sm rounded-4 mb-4" style="border: 1px solid #e2e8f0 !important;">
         <div class="card-body p-3">
             <form method="GET" class="row g-2 align-items-center">
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <select name="assigned_to" class="form-select form-select-sm" onchange="this.form.submit()">
-                        <option value="">-- All Assigned Employees --</option>
+                        <option value="">-- All Assigned --</option>
                         @foreach($employees as $emp)
                         <option value="{{ $emp->id }}" {{ request('assigned_to') == $emp->id ? 'selected' : '' }}>
                             {{ $emp->name }}
@@ -38,7 +38,7 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <select name="customer_id" class="form-select form-select-sm" onchange="this.form.submit()">
                         <option value="">-- All Customers --</option>
                         @foreach($customers as $c)
@@ -64,6 +64,9 @@
                         <option value="review" {{ request('status') == 'review' ? 'selected' : '' }}>Review</option>
                         <option value="done" {{ request('status') == 'done' ? 'selected' : '' }}>Done</option>
                     </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="date" name="task_date" class="form-control form-control-sm" value="{{ request('task_date') }}" onchange="this.form.submit()" title="Filter by Created Date">
                 </div>
                 <div class="col-md-2 text-end">
                     <a href="{{ route('admin.tasks.index') }}" class="btn btn-sm btn-outline-secondary rounded-pill w-100">

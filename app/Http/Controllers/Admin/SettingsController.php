@@ -20,6 +20,12 @@ class SettingsController extends Controller
             'whatsapp_api_url' => CompanySetting::get('whatsapp_api_url', ''),
             'whatsapp_api_token' => CompanySetting::get('whatsapp_api_token', ''),
             'whatsapp_phone_number_id' => CompanySetting::get('whatsapp_phone_number_id', ''),
+            'material_sku_prefix' => CompanySetting::get('material_sku_prefix', 'MAT'),
+            'service_sku_prefix' => CompanySetting::get('service_sku_prefix', 'SER'),
+            'sku_separator' => CompanySetting::get('sku_separator', '-'),
+            'sku_digits' => CompanySetting::get('sku_digits', 4),
+            'sku_suffix' => CompanySetting::get('sku_suffix', ''),
+            'sku_start_number' => CompanySetting::get('sku_start_number', 1),
         ];
 
         return view('admin.settings.index', compact('settings'));
@@ -43,6 +49,12 @@ class SettingsController extends Controller
             'bank_ifsc' => 'nullable|string|max:20',
             'upi_id' => 'nullable|string|max:100',
             'upi_qr_image' => 'nullable|image|max:2048',
+            'material_sku_prefix' => 'nullable|string|max:20',
+            'service_sku_prefix' => 'nullable|string|max:20',
+            'sku_separator' => 'nullable|string|max:5',
+            'sku_digits' => 'required|integer|min:1|max:10',
+            'sku_suffix' => 'nullable|string|max:20',
+            'sku_start_number' => 'required|integer|min:1',
         ]);
 
         if ($request->hasFile('upi_qr_image')) {

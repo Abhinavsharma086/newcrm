@@ -11,7 +11,25 @@ class SocietyController extends Controller
     public function index()
     {
         $societies = Society::with('contractor')->orderBy('name')->get();
-        return view('admin.societies.index', compact('societies'));
+        
+        $customerCounts = \App\Models\Customer::whereNotNull('society')
+            ->where('society', '!=', '')
+            ->select('society', \Illuminate\Support\Facades\DB::raw('count(*) as count'))
+            ->groupBy('society')
+            ->get();
+            
+        return view('admin.societies.index', compact('societies', 'customerCounts'));
+    }
+
+    public function getCustomers(Request $request)
+    {
+        $society = $request->input('society');
+        $customers = \App\Models\Customer::where('society', $society)
+            ->select('id', 'name', 'phone', 'crn_no', 'customer_stage')
+            ->orderBy('name')
+            ->get();
+            
+        return response()->json($customers);
     }
 
     public function create()

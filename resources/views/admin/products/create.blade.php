@@ -20,7 +20,7 @@
                 <div class="col-md-4 mb-3">
                     <label for="sku" class="form-label">SKU / Item Code <span class="text-danger">*</span></label>
                     <input type="text" class="form-control @error('sku') is-invalid @enderror" 
-                           id="sku" name="sku" value="{{ old('sku') }}" placeholder="e.g. MLC-PIPE-16" required>
+                           id="sku" name="sku" value="{{ old('sku', '') }}" placeholder="e.g. MAT-0001" required>
                     @error('sku')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
 
@@ -130,4 +130,41 @@
         </form>
     </div>
 </div>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeSelect = document.getElementById('type');
+    const skuInput = document.getElementById('sku');
+    const defaultMaterialSku = @json($nextMaterialSku ?? '');
+    const defaultServiceSku = @json($nextServiceSku ?? '');
+    const oldSku = @json(old('sku', ''));
+
+    let userModifiedSku = false;
+
+    // Check if user manually typed something other than the defaults
+    if (oldSku && oldSku !== defaultMaterialSku && oldSku !== defaultServiceSku) {
+        userModifiedSku = true;
+        skuInput.value = oldSku;
+    }
+
+    skuInput.addEventListener('input', function() {
+        userModifiedSku = true;
+    });
+
+    typeSelect.addEventListener('change', function() {
+        if (!userModifiedSku || skuInput.value === defaultMaterialSku || skuInput.value === defaultServiceSku) {
+            skuInput.value = this.value === 'service' ? defaultServiceSku : defaultMaterialSku;
+            userModifiedSku = false;
+        }
+    });
+
+    // Initialize if empty or not modified
+    if (!userModifiedSku) {
+        skuInput.value = typeSelect.value === 'service' ? defaultServiceSku : defaultMaterialSku;
+    }
+});
+</script>
+@endpush

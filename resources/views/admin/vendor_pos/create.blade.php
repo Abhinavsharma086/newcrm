@@ -71,15 +71,17 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label small fw-semibold">IRN (Invoice Reference Number)</label>
-                        <input type="text" class="form-control form-control-sm font-monospace" name="irn" id="irn" placeholder="e.g. 3c155dfe74b4e76a17c37cc88d24a7eabd7d64b4ecacd40790482da369c21fe4">
+                        <input type="text" maxlength="8" class="form-control form-control-sm font-monospace text-uppercase" name="irn" id="irn" value="{{ old('irn') }}" placeholder="e.g. A1B2C3D4" oninput="document.getElementById('irn-length').innerText = this.value.length + '/8'; if(this.value.length == 8) { this.classList.add('is-valid'); } else { this.classList.remove('is-valid'); }">
+                        <small class="text-muted" id="irn-length" style="font-size: 0.75rem;">{{ old('irn') ? strlen(old('irn')) : 0 }}/8</small>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-semibold">Ack No.</label>
-                        <input type="text" class="form-control form-control-sm font-monospace" name="ack_no" id="ack_no" placeholder="e.g. 112631827787647">
+                        <input type="text" class="form-control form-control-sm font-monospace" name="ack_no" id="ack_no" value="{{ old('ack_no') }}" placeholder="e.g. 112631827787647" oninput="document.getElementById('ack-length').innerText = this.value.length + ' chars';">
+                        <small class="text-muted" id="ack-length" style="font-size: 0.75rem;">{{ old('ack_no') ? strlen(old('ack_no')) : 0 }} chars</small>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-semibold">Ack Date</label>
-                        <input type="date" class="form-control form-control-sm" name="ack_date" id="ack_date">
+                        <input type="date" class="form-control form-control-sm" name="ack_date" id="ack_date" value="{{ old('ack_date') }}">
                     </div>
                 </div>
             </div>
@@ -114,7 +116,12 @@
 
                             <div class="mb-2">
                                 <label class="form-label small fw-semibold">GSTIN / UIN</label>
-                                <input type="text" class="form-control form-control-sm font-monospace text-uppercase" name="vendor_gstin" id="vendor_gstin" placeholder="e.g. 29AARCP0638H1Z0">
+                                <div class="position-relative">
+                                    <input type="text" class="form-control form-control-sm font-monospace text-uppercase" name="vendor_gstin" id="vendor_gstin" placeholder="e.g. 29AARCP0638H1Z0" maxlength="15">
+                                    <div id="vendorGstSpinner" class="spinner-border spinner-border-sm text-primary position-absolute d-none" role="status" style="right: 10px; top: 6px;">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="mb-2">
@@ -147,7 +154,12 @@
 
                             <div class="mb-2">
                                 <label class="form-label small fw-semibold">GSTIN / UIN</label>
-                                <input type="text" class="form-control form-control-sm font-monospace text-uppercase" name="consignee_gstin" id="consignee_gstin" value="08AAVCM0147N1ZU">
+                                <div class="position-relative">
+                                    <input type="text" class="form-control form-control-sm font-monospace text-uppercase" name="consignee_gstin" id="consignee_gstin" value="08AAVCM0147N1ZU" maxlength="15">
+                                    <div id="consigneeGstSpinner" class="spinner-border spinner-border-sm text-primary position-absolute d-none" role="status" style="right: 10px; top: 6px;">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="mb-2">
@@ -184,7 +196,12 @@
 
                             <div class="mb-2">
                                 <label class="form-label small fw-semibold">Billing GSTIN</label>
-                                <input type="text" class="form-control form-control-sm font-monospace text-uppercase" name="buyer_gstin" id="buyer_gstin" value="08AAVCM0147N1ZU">
+                                <div class="position-relative">
+                                    <input type="text" class="form-control form-control-sm font-monospace text-uppercase" name="buyer_gstin" id="buyer_gstin" value="08AAVCM0147N1ZU" maxlength="15">
+                                    <div id="buyerGstSpinner" class="spinner-border spinner-border-sm text-primary position-absolute d-none" role="status" style="right: 10px; top: 6px;">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="mb-2">
@@ -716,6 +733,57 @@ items = [{
     total_value: 0
 }];
 renderRows();
+function autoFillGST(inputId, spinnerId, nameInputId, addressInputId, stateInputId, stateCodeInputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    
+    input.addEventListener('input', function() {
+        const gstin = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        this.value = gstin;
+        
+        if (gstin.length === 15) {
+            const spinner = document.getElementById(spinnerId);
+            if (spinner) spinner.classList.remove('d-none');
+            
+            fetch(`/admin/api/verify-gstin/${gstin}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (spinner) spinner.classList.add('d-none');
+                    if (data.success && data.data) {
+                        const name = data.data.name || data.data.legal_name || data.data.trade_name;
+                        const nameInput = document.getElementById(nameInputId);
+                        const addressInput = document.getElementById(addressInputId);
+                        const stateInput = document.getElementById(stateInputId);
+                        const stateCodeInput = document.getElementById(stateCodeInputId);
+                        
+                        if (nameInput && (nameInput.value === '' || nameInput.value === 'Metric Qube Energy Pvt Ltd' || nameInput.value.includes('Proxima'))) {
+                            nameInput.value = name;
+                        }
+                        if (addressInput && (addressInput.value === '' || addressInput.value.includes('Plot No. 246-P') || addressInput.value.includes('184, OBC Colony'))) {
+                            addressInput.value = data.data.address || '';
+                        }
+                        if (stateInput && (stateInput.value === '' || stateInput.value === 'Haryana' || stateInput.value === 'Rajasthan')) {
+                            stateInput.value = data.data.state || '';
+                        }
+                        if (stateCodeInput && (stateCodeInput.value === '' || stateCodeInput.value === '08' || stateCodeInput.value === '08 (HR)' || stateCodeInput.value === '08 (RJ)')) {
+                            const sc = gstin.substring(0, 2);
+                            stateCodeInput.value = `${sc} (${data.data.state || ''})`;
+                        }
+                    }
+                })
+                .catch(error => {
+                    if (spinner) spinner.classList.add('d-none');
+                    console.error('Error fetching GST details:', error);
+                });
+        }
+    });
+}
+
+// Bind auto-fetch for the 3 GSTIN fields
+autoFillGST('vendor_gstin', 'vendorGstSpinner', 'vendor_name', 'vendor_address', 'vendor_state', null);
+autoFillGST('consignee_gstin', 'consigneeGstSpinner', 'consignee_name', 'consignee_address', 'consignee_state', 'consignee_state_code');
+autoFillGST('buyer_gstin', 'buyerGstSpinner', 'buyer_name', 'buyer_address', 'buyer_state', 'buyer_state_code');
+
 </script>
 @endpush
 @endsection

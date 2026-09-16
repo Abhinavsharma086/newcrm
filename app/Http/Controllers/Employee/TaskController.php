@@ -9,18 +9,21 @@ use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $tasks = Task::where('assigned_to', auth()->id())
-            ->with('creator')
-            ->latest()
-            ->get();
+        $query = Task::where('assigned_to', auth()->id())->with('creator')->latest();
+        
+        if ($request->filled('task_date')) {
+            $query->whereDate('created_at', $request->task_date);
+        }
+        
+        $tasks = $query->get();
 
         $tasksByStatus = [
-            'todo' => Task::where('assigned_to', auth()->id())->where('status', 'todo')->get(),
-            'progress' => Task::where('assigned_to', auth()->id())->where('status', 'progress')->get(),
-            'review' => Task::where('assigned_to', auth()->id())->where('status', 'review')->get(),
-            'done' => Task::where('assigned_to', auth()->id())->where('status', 'done')->get(),
+            'todo' => $tasks->where('status', 'todo'),
+            'progress' => $tasks->where('status', 'progress'),
+            'review' => $tasks->where('status', 'review'),
+            'done' => $tasks->where('status', 'done'),
         ];
 
         return view('employee.tasks.index', compact('tasks', 'tasksByStatus'));

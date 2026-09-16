@@ -128,6 +128,78 @@
                     </div>
                 </x-card>
             </div>
+
+            {{-- SKU Format Settings --}}
+            <div class="col-md-12">
+                <x-card title="SKU Format Settings">
+                    <div class="alert alert-info small mb-3">
+                        <i class="fas fa-barcode me-1"></i> Customize how SKUs are automatically generated for different item types.
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-2">
+                            <label class="form-label">Material Prefix</label>
+                            <input type="text" id="material_sku_prefix" name="material_sku_prefix" class="form-control" 
+                                   value="{{ old('material_sku_prefix', $settings['material_sku_prefix']) }}" placeholder="e.g. MAT">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Service Prefix</label>
+                            <input type="text" id="service_sku_prefix" name="service_sku_prefix" class="form-control" 
+                                   value="{{ old('service_sku_prefix', $settings['service_sku_prefix']) }}" placeholder="e.g. SER">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Separator</label>
+                            <select id="sku_separator" name="sku_separator" class="form-select">
+                                <option value="-" {{ old('sku_separator', $settings['sku_separator']) == '-' ? 'selected' : '' }}>Dash (-)</option>
+                                <option value="_" {{ old('sku_separator', $settings['sku_separator']) == '_' ? 'selected' : '' }}>Underscore (_)</option>
+                                <option value="/" {{ old('sku_separator', $settings['sku_separator']) == '/' ? 'selected' : '' }}>Slash (/)</option>
+                                <option value="" {{ old('sku_separator', $settings['sku_separator']) == '' ? 'selected' : '' }}>None</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Number of Digits</label>
+                            <input type="number" id="sku_digits" name="sku_digits" class="form-control" 
+                                   value="{{ old('sku_digits', $settings['sku_digits']) }}" min="1" max="10">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Starting Number</label>
+                            <input type="number" id="sku_start_number" name="sku_start_number" class="form-control" 
+                                   value="{{ old('sku_start_number', $settings['sku_start_number']) }}" min="1">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Suffix (Optional)</label>
+                            <input type="text" id="sku_suffix" name="sku_suffix" class="form-control" 
+                                   value="{{ old('sku_suffix', $settings['sku_suffix']) }}" placeholder="e.g. 2026">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label d-block">&nbsp;</label>
+                            <button type="button" id="resetSkuBtn" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-undo me-1"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-light border rounded">
+                        <div class="row align-items-center mb-2">
+                            <div class="col-md-3">
+                                <span class="text-muted fw-bold">Material Preview:</span>
+                            </div>
+                            <div class="col-md-9">
+                                <input type="text" id="material_sku_preview" class="form-control fw-bold text-primary font-monospace" readonly style="background-color: #fff; border: 1px dashed #0d6efd;">
+                            </div>
+                        </div>
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
+                                <span class="text-muted fw-bold">Service Preview:</span>
+                            </div>
+                            <div class="col-md-9">
+                                <input type="text" id="service_sku_preview" class="form-control fw-bold text-success font-monospace" readonly style="background-color: #fff; border: 1px dashed #198754;">
+                            </div>
+                        </div>
+                        <small class="text-muted mt-2 d-block">This format will be applied automatically when creating new products or services. Existing product SKUs will not be changed.</small>
+                    </div>
+                </x-card>
+            </div>
         </div>
 
         <div class="mt-3">
@@ -138,3 +210,62 @@
     </form>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const matPrefixEl = document.getElementById('material_sku_prefix');
+    const serPrefixEl = document.getElementById('service_sku_prefix');
+    const separatorEl = document.getElementById('sku_separator');
+    const digitsEl = document.getElementById('sku_digits');
+    const startNumEl = document.getElementById('sku_start_number');
+    const suffixEl = document.getElementById('sku_suffix');
+    const matPreviewEl = document.getElementById('material_sku_preview');
+    const serPreviewEl = document.getElementById('service_sku_preview');
+    const resetBtn = document.getElementById('resetSkuBtn');
+
+    function updatePreview() {
+        const matPrefix = matPrefixEl.value.trim();
+        const serPrefix = serPrefixEl.value.trim();
+        const sep = separatorEl.value;
+        const digits = parseInt(digitsEl.value) || 4;
+        const startNum = startNumEl.value.trim() || '1';
+        const suffix = suffixEl.value.trim();
+
+        let numStr = startNum.padStart(digits, '0');
+        
+        let matPreview = '';
+        if (matPrefix) matPreview += matPrefix + sep;
+        matPreview += numStr;
+        if (suffix) matPreview += sep + suffix;
+        matPreviewEl.value = matPreview;
+
+        let serPreview = '';
+        if (serPrefix) serPreview += serPrefix + sep;
+        serPreview += numStr;
+        if (suffix) serPreview += sep + suffix;
+        serPreviewEl.value = serPreview;
+    }
+
+    // Attach listeners
+    [matPrefixEl, serPrefixEl, separatorEl, digitsEl, startNumEl, suffixEl].forEach(el => {
+        el.addEventListener('input', updatePreview);
+        el.addEventListener('change', updatePreview);
+    });
+
+    // Reset button
+    resetBtn.addEventListener('click', function() {
+        matPrefixEl.value = 'MAT';
+        serPrefixEl.value = 'SER';
+        separatorEl.value = '-';
+        digitsEl.value = 4;
+        startNumEl.value = 1;
+        suffixEl.value = '';
+        updatePreview();
+    });
+
+    // Initial preview
+    updatePreview();
+});
+</script>
+@endpush

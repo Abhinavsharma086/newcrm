@@ -264,7 +264,7 @@ class VendorPoController extends Controller
             'vendor_state' => 'nullable|string',
             'vendor_contact' => 'nullable|string',
 
-            'irn' => 'nullable|string',
+            'irn' => 'nullable|string|max:8',
             'ack_no' => 'nullable|string',
             'ack_date' => 'nullable|date',
 

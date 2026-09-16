@@ -56,6 +56,32 @@ class CustomerController extends Controller
         return view('admin.customers.index', compact('customers', 'employees', 'societies', 'section'));
     }
 
+    public function storeAjax(Request $request)
+    {
+        $validated = $request->validate([
+            'company_name' => 'required|string|max:255',
+            'gstin'        => 'required|string|max:15',
+            'address'      => 'nullable|string',
+            'state'        => 'nullable|string|max:100',
+            'phone'        => 'nullable|string|max:20',
+        ]);
+
+        $customer = Customer::create([
+            'company_name' => $validated['company_name'],
+            'name'         => $validated['company_name'],
+            'gstin'        => $validated['gstin'],
+            'address'      => $validated['address'],
+            'state'        => $validated['state'],
+            'phone'        => $validated['phone'] ?? '0000000000',
+            'source'       => 'manual',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'customer' => $customer
+        ]);
+    }
+
     public function export()
     {
         return Excel::download(new CustomersExport, 'customers_export.xlsx');

@@ -26,6 +26,9 @@ class TaskController extends Controller
         if ($request->filled('priority')) {
             $query->where('priority', $request->priority);
         }
+        if ($request->filled('task_date')) {
+            $query->whereDate('created_at', $request->task_date);
+        }
 
         $tasks = $query->get();
         $employees = User::where('status', 'active')->get();

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
+use App\Models\CompanySetting;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -16,7 +17,30 @@ class ProductController extends Controller
 
     public function create()
     {
-        return view('admin.products.create');
+        $matPrefix = CompanySetting::get('material_sku_prefix', 'MAT');
+        $serPrefix = CompanySetting::get('service_sku_prefix', 'SER');
+        $separator = CompanySetting::get('sku_separator', '-');
+        $digits = CompanySetting::get('sku_digits', 4);
+        $suffix = CompanySetting::get('sku_suffix', '');
+        $startNumber = CompanySetting::get('sku_start_number', 1);
+
+        $latestProduct = Product::orderBy('id', 'desc')->first();
+        $nextIdOffset = $latestProduct ? $latestProduct->id : 0;
+        $runningNumber = $startNumber + $nextIdOffset;
+
+        $paddedNumber = str_pad($runningNumber, $digits, '0', STR_PAD_LEFT);
+        
+        $nextMaterialSku = '';
+        if ($matPrefix) $nextMaterialSku .= $matPrefix . $separator;
+        $nextMaterialSku .= $paddedNumber;
+        if ($suffix) $nextMaterialSku .= $separator . $suffix;
+
+        $nextServiceSku = '';
+        if ($serPrefix) $nextServiceSku .= $serPrefix . $separator;
+        $nextServiceSku .= $paddedNumber;
+        if ($suffix) $nextServiceSku .= $separator . $suffix;
+
+        return view('admin.products.create', compact('nextMaterialSku', 'nextServiceSku'));
     }
 
     public function store(Request $request)
@@ -79,6 +103,7 @@ class ProductController extends Controller
             'price'         => 'required|numeric|min:0',
             'tax_rate'      => 'required|numeric|min:0|max:100',
             'reorder_level' => 'required|integer|min:0',
+            'current_stock' => 'required|integer|min:0',
             'image'         => 'nullable|image|max:2048',
         ]);
 

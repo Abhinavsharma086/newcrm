@@ -29,7 +29,7 @@ class InventoryController extends Controller
     {
         $type = $request->get('type', 'inward');
         $logs = MaterialLog::where('log_type', $type)->with('product', 'supplier', 'client', 'warehouse')->latest()->get();
-        $products = Product::all();
+        $products = Product::all()->unique('name');
         $suppliers = Supplier::where('is_active', true)->get();
         $clients = Client::where('is_active', true)->get();
         $warehouses = Warehouse::all();
