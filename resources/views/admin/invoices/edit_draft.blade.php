@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Create Invoice')
+@section('title', 'Edit Draft Invoice')
 
 @section('content')
 <style>
@@ -18,7 +18,7 @@
 </style>
 <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2><i class="fas fa-file-invoice text-primary me-2"></i>Create Invoice</h2>
+        <h2><i class="fas fa-file-invoice text-primary me-2"></i>Edit Draft Invoice</h2>
         <a href="{{ route('admin.invoices.index') }}" class="btn btn-secondary btn-sm">
             <i class="fas fa-arrow-left me-1"></i> Back
         </a>
@@ -30,8 +30,9 @@
     </div>
     @endif
 
-    <form action="{{ route('admin.invoices.store') }}" method="POST" id="invoiceForm" enctype="multipart/form-data">
+    <form action="{{ route('admin.invoices.update', $invoice) }}" method="POST" id="invoiceForm" enctype="multipart/form-data">
         @csrf
+        @method('PUT')
 
         {{-- Invoice Details --}}
         <div class="card mb-3 shadow-sm">
@@ -40,21 +41,21 @@
                 <div class="row g-3">
                     <div class="col-lg-2 col-md-3">
                         <label class="form-label fw-semibold">Invoice No</label>
-                        <input type="text" class="form-control bg-light fw-bold" value="{{ $invoiceNo }}" readonly>
+                        <input type="text" class="form-control bg-light fw-bold" value="{{ $invoice->invoice_no }}" readonly>
                     </div>
                     <div class="col-lg-2 col-md-3">
                         <label class="form-label fw-semibold">Invoice Type <span class="text-danger">*</span></label>
                         <select class="form-select @error('invoice_type') is-invalid @enderror" name="invoice_type" id="invoice_type" required>
-                            <option value="tax_invoice" {{ old('invoice_type') == 'tax_invoice' ? 'selected' : '' }}>Tax Invoice</option>
-                            <option value="without_gst" {{ old('invoice_type') == 'without_gst' ? 'selected' : '' }}>Without GST Bill</option>
-                            <option value="proforma" {{ old('invoice_type') == 'proforma' ? 'selected' : '' }}>Proforma Invoice</option>
+                            <option value="tax_invoice" {{ old('invoice_type', $invoice->invoice_type) == 'tax_invoice' ? 'selected' : '' }}>Tax Invoice</option>
+                            <option value="without_gst" {{ old('invoice_type', $invoice->invoice_type) == 'without_gst' ? 'selected' : '' }}>Without GST Bill</option>
+                            <option value="proforma" {{ old('invoice_type', $invoice->invoice_type) == 'proforma' ? 'selected' : '' }}>Proforma Invoice</option>
                         </select>
                         @error('invoice_type')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-lg-2 col-md-3">
                         <label class="form-label fw-semibold">Invoice Date <span class="text-danger">*</span></label>
                         <input type="date" class="form-control @error('invoice_date') is-invalid @enderror"
-                               name="invoice_date" value="{{ old('invoice_date', date('Y-m-d')) }}" required>
+                               name="invoice_date" value="{{ old('invoice_date', $invoice->invoice_date ? $invoice->invoice_date->format('Y-m-d') : date('Y-m-d')) }}" required>
                         @error('invoice_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-lg-2 col-md-3">
@@ -66,20 +67,22 @@
                             <option value="15">15 Days</option>
                             <option value="30">30 Days</option>
                         </select>
-                        <input type="hidden" name="due_date" id="due_date" value="{{ old('due_date') }}">
+                        <input type="hidden" name="due_date" id="due_date" value="{{ old('due_date', $invoice->due_date ? $invoice->due_date->format('Y-m-d') : '') }}">
                         <small class="text-muted fw-semibold" id="due_date_display"></small>
                         @error('due_date')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-lg-3 col-md-3">
-                        <label class="form-label fw-semibold d-flex justify-content-between align-items-center">
-                            <span>Biller / GST Holder <span class="text-danger">*</span></span>
-                            <button type="button" class="btn btn-sm btn-link p-0 text-decoration-none" data-bs-toggle="modal" data-bs-toggle="modal" data-bs-target="#addBillerModal"><i class="fas fa-plus-circle me-1"></i>New</button>
-                        </label>
-                        <select class="form-select @error('biller_id') is-invalid @enderror"
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label class="form-label fw-semibold mb-0">Biller / GST Holder <span class="text-danger">*</span></label>
+                            <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" data-bs-toggle="modal" data-bs-target="#addBillerModal">
+                                <i class="fas fa-plus me-1"></i>Add New
+                            </button>
+                        </div>
+                        <select class="form-select mt-1 @error('biller_id') is-invalid @enderror"
                                 name="biller_id" id="biller_id" required>
                             <option value="">-- Select Biller --</option>
                             @foreach($billers as $biller)
-                            <option value="{{ $biller->id }}" {{ old('biller_id') == $biller->id ? 'selected' : '' }}
+                            <option value="{{ $biller->id }}" {{ old('biller_id', $invoice->biller_id) == $biller->id ? 'selected' : '' }}
                                 data-gstin="{{ $biller->gstin }}"
                                 data-address="{{ $biller->address }}"
                                 data-state="{{ $biller->state }}"
@@ -101,7 +104,7 @@
                                 name="client_id" id="client_id">
                             <option value="">-- Select Client --</option>
                             @foreach($clients as $client)
-                            <option value="{{ $client->id }}" {{ old('client_id') == $client->id ? 'selected' : '' }}>
+                            <option value="{{ $client->id }}" {{ old('client_id', $invoice->client_id) == $client->id ? 'selected' : '' }}>
                                 {{ $client->name }}
                             </option>
                             @endforeach
@@ -113,7 +116,7 @@
                         <select class="form-select select2-tags @error('customer_name') is-invalid @enderror" name="customer_name" required>
                             <option value="">Select or Type</option>
                             @foreach($customers as $c)
-                                <option value="{{ $c->name }}" {{ old('customer_name') == $c->name ? 'selected' : '' }}>
+                                <option value="{{ $c->name }}" {{ old('customer_name', optional($invoice->customer)->name) == $c->name ? 'selected' : '' }}>
                                     {{ $c->name }} @if($c->company_name)({{ $c->company_name }})@endif
                                 </option>
                             @endforeach
@@ -140,15 +143,15 @@
                         <h6 class="fw-bold text-primary mb-3">Bill To</h6>
                         <div class="mb-2">
                             <label class="form-label small fw-semibold">Name</label>
-                            <input type="text" class="form-control form-control-sm @error('billing_name') is-invalid @enderror" name="billing_name" id="billing_name" value="{{ old('billing_name') }}">
+                            <input type="text" class="form-control form-control-sm @error('billing_name') is-invalid @enderror" name="billing_name" id="billing_name" value="{{ old('billing_name', $invoice->billing_name) }}">
                         </div>
                         <div class="mb-2">
                             <label class="form-label small fw-semibold">Address (Street, City, State, Pincode)</label>
-                            <textarea class="form-control form-control-sm @error('billing_address') is-invalid @enderror" name="billing_address" id="billing_address" rows="3">{{ old('billing_address') }}</textarea>
+                            <textarea class="form-control form-control-sm @error('billing_address') is-invalid @enderror" name="billing_address" id="billing_address" rows="3">{{ old('billing_address', $invoice->billing_address) }}</textarea>
                         </div>
                         <div class="mb-2">
                             <label class="form-label small fw-semibold">GSTIN (if applicable)</label>
-                            <input type="text" class="form-control form-control-sm @error('billing_gstin') is-invalid @enderror text-uppercase" name="billing_gstin" id="billing_gstin" value="{{ old('billing_gstin') }}" maxlength="15">
+                            <input type="text" class="form-control form-control-sm @error('billing_gstin') is-invalid @enderror text-uppercase" name="billing_gstin" id="billing_gstin" value="{{ old('billing_gstin', $invoice->billing_gstin) }}" maxlength="15">
                         </div>
                     </div>
                     
@@ -157,15 +160,15 @@
                         <h6 class="fw-bold text-success mb-3">Ship To</h6>
                         <div class="mb-2">
                             <label class="form-label small fw-semibold">Name</label>
-                            <input type="text" class="form-control form-control-sm @error('shipping_name') is-invalid @enderror" name="shipping_name" id="shipping_name" value="{{ old('shipping_name') }}">
+                            <input type="text" class="form-control form-control-sm @error('shipping_name') is-invalid @enderror" name="shipping_name" id="shipping_name" value="{{ old('shipping_name', $invoice->shipping_name) }}">
                         </div>
                         <div class="mb-2">
                             <label class="form-label small fw-semibold">Address (Street, City, State, Pincode)</label>
-                            <textarea class="form-control form-control-sm @error('shipping_address') is-invalid @enderror" name="shipping_address" id="shipping_address" rows="3">{{ old('shipping_address') }}</textarea>
+                            <textarea class="form-control form-control-sm @error('shipping_address') is-invalid @enderror" name="shipping_address" id="shipping_address" rows="3">{{ old('shipping_address', $invoice->shipping_address) }}</textarea>
                         </div>
                         <div class="mb-2">
                             <label class="form-label small fw-semibold">GSTIN (optional)</label>
-                            <input type="text" class="form-control form-control-sm @error('shipping_gstin') is-invalid @enderror text-uppercase" name="shipping_gstin" id="shipping_gstin" value="{{ old('shipping_gstin') }}" maxlength="15">
+                            <input type="text" class="form-control form-control-sm @error('shipping_gstin') is-invalid @enderror text-uppercase" name="shipping_gstin" id="shipping_gstin" value="{{ old('shipping_gstin', $invoice->shipping_gstin) }}" maxlength="15">
                         </div>
                     </div>
                 </div>
@@ -200,37 +203,77 @@
                             </tr>
                         </thead>
                         <tbody id="itemsBody">
-                            <tr class="item-row">
-                                <td>
-                                    <select class="form-select form-select-sm select2-tags product-select" name="items[0][product_name]" required>
-                                        <option value="">Select or Type Product</option>
-                                        @foreach($products as $p)
-                                            <option value="{{ $p->name }}"
-                                                data-price="{{ $p->price }}"
-                                                data-tax="{{ $p->tax_rate }}"
-                                                data-unit="{{ $p->unit }}"
-                                                data-hsn="{{ $p->hsn_code }}"
-                                                data-stock="{{ $p->current_stock }}">
-                                                {{ $p->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </td>
-                                <td><input type="text" class="form-control form-control-sm item-desc" name="items[0][description]" placeholder="Description"></td>
-                                <td><input type="number" class="form-control form-control-sm qty text-center" name="items[0][quantity]" value="1" min="0.01" step="0.01" required></td>
-                                <td><input type="text" class="form-control form-control-sm uom text-center" name="items[0][unit]" placeholder="Nos" readonly tabindex="-1"></td>
-                                <td class="text-center align-middle">
-                                    <span class="badge bg-secondary stock-badge">N/A</span>
-                                    <input type="hidden" class="item-stock" value="">
-                                </td>
-                                <td><input type="number" step="0.01" class="form-control form-control-sm rate text-end" name="items[0][unit_price]" value="0" min="0" required></td>
-                                <td><input type="number" step="0.01" class="form-control form-control-sm disc text-center" name="items[0][discount_percent]" value="0" min="0" max="100"></td>
-                                <td><input type="number" class="form-control form-control-sm gst-rate text-center" value="0" readonly tabindex="-1"></td>
-                                <td><input type="text" class="form-control form-control-sm taxable text-end" value="0.00" readonly tabindex="-1"></td>
-                                <td><input type="text" class="form-control form-control-sm gst-amt text-end" value="0.00" readonly tabindex="-1"></td>
-                                <td><input type="text" class="form-control form-control-sm total-amt text-end" value="0.00" readonly tabindex="-1"></td>
-                                <td class="text-center"><button type="button" class="btn btn-outline-danger btn-sm remove-row"><i class="fas fa-trash-alt"></i></button></td>
-                            </tr>
+                            @php $rowIndex = 0; @endphp
+                            @forelse($invoice->items as $idx => $invItem)
+                                <tr class="item-row">
+                                    <td>
+                                        <select class="form-select form-select-sm select2-tags product-select" name="items[{{ $idx }}][product_name]" required>
+                                            <option value="">Select or Type Product</option>
+                                            @foreach($products as $p)
+                                                <option value="{{ $p->name }}"
+                                                    data-price="{{ $p->price }}"
+                                                    data-tax="{{ $p->tax_rate }}"
+                                                    data-unit="{{ $p->unit }}"
+                                                    data-hsn="{{ $p->hsn_code }}"
+                                                    data-stock="{{ $p->current_stock }}"
+                                                    {{ (optional($invItem->product)->name == $p->name || $invItem->description == $p->name) ? 'selected' : '' }}>
+                                                    {{ $p->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td><input type="text" class="form-control form-control-sm item-desc" name="items[{{ $idx }}][description]" value="{{ $invItem->description }}" placeholder="Description"></td>
+                                    <td><input type="number" class="form-control form-control-sm qty text-center" name="items[{{ $idx }}][quantity]" value="{{ $invItem->quantity }}" min="0.01" step="0.01" required></td>
+                                    <td><input type="text" class="form-control form-control-sm uom text-center" name="items[{{ $idx }}][unit]" value="{{ $invItem->unit }}" placeholder="Nos" readonly tabindex="-1"></td>
+                                    <td class="text-center align-middle">
+                                        <span class="badge bg-secondary stock-badge">
+                                            {{ optional($invItem->product)->current_stock ?? 'N/A' }}
+                                        </span>
+                                        <input type="hidden" class="item-stock" value="{{ optional($invItem->product)->current_stock ?? '' }}">
+                                    </td>
+                                    <td><input type="number" step="0.01" class="form-control form-control-sm rate text-end" name="items[{{ $idx }}][unit_price]" value="{{ $invItem->unit_price }}" min="0" required></td>
+                                    <td><input type="number" step="0.01" class="form-control form-control-sm disc text-center" name="items[{{ $idx }}][discount_percent]" value="{{ $invItem->discount_percent ?? 0 }}" min="0" max="100"></td>
+                                    <td><input type="number" class="form-control form-control-sm gst-rate text-center" value="{{ $invItem->tax_rate }}" readonly tabindex="-1"></td>
+                                    <td><input type="text" class="form-control form-control-sm taxable text-end" value="{{ number_format(($invItem->quantity * $invItem->unit_price) - (($invItem->quantity * $invItem->unit_price) * ($invItem->discount_percent ?? 0) / 100), 2, '.', '') }}" readonly tabindex="-1"></td>
+                                    <td><input type="text" class="form-control form-control-sm gst-amt text-end" value="{{ number_format($invItem->cgst + $invItem->sgst + $invItem->igst, 2, '.', '') }}" readonly tabindex="-1"></td>
+                                    <td><input type="text" class="form-control form-control-sm total-amt text-end" value="{{ $invItem->total }}" readonly tabindex="-1"></td>
+                                    <td class="text-center"><button type="button" class="btn btn-outline-danger btn-sm remove-row"><i class="fas fa-trash-alt"></i></button></td>
+                                </tr>
+                                @php $rowIndex = $idx + 1; @endphp
+                            @empty
+                                <tr class="item-row">
+                                    <td>
+                                        <select class="form-select form-select-sm select2-tags product-select" name="items[0][product_name]" required>
+                                            <option value="">Select or Type Product</option>
+                                            @foreach($products as $p)
+                                                <option value="{{ $p->name }}"
+                                                    data-price="{{ $p->price }}"
+                                                    data-tax="{{ $p->tax_rate }}"
+                                                    data-unit="{{ $p->unit }}"
+                                                    data-hsn="{{ $p->hsn_code }}"
+                                                    data-stock="{{ $p->current_stock }}">
+                                                    {{ $p->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </td>
+                                    <td><input type="text" class="form-control form-control-sm item-desc" name="items[0][description]" placeholder="Description"></td>
+                                    <td><input type="number" class="form-control form-control-sm qty text-center" name="items[0][quantity]" value="1" min="0.01" step="0.01" required></td>
+                                    <td><input type="text" class="form-control form-control-sm uom text-center" name="items[0][unit]" placeholder="Nos" readonly tabindex="-1"></td>
+                                    <td class="text-center align-middle">
+                                        <span class="badge bg-secondary stock-badge">N/A</span>
+                                        <input type="hidden" class="item-stock" value="">
+                                    </td>
+                                    <td><input type="number" step="0.01" class="form-control form-control-sm rate text-end" name="items[0][unit_price]" value="0" min="0" required></td>
+                                    <td><input type="number" step="0.01" class="form-control form-control-sm disc text-center" name="items[0][discount_percent]" value="0" min="0" max="100"></td>
+                                    <td><input type="number" class="form-control form-control-sm gst-rate text-center" value="0" readonly tabindex="-1"></td>
+                                    <td><input type="text" class="form-control form-control-sm taxable text-end" value="0.00" readonly tabindex="-1"></td>
+                                    <td><input type="text" class="form-control form-control-sm gst-amt text-end" value="0.00" readonly tabindex="-1"></td>
+                                    <td><input type="text" class="form-control form-control-sm total-amt text-end" value="0.00" readonly tabindex="-1"></td>
+                                    <td class="text-center"><button type="button" class="btn btn-outline-danger btn-sm remove-row"><i class="fas fa-trash-alt"></i></button></td>
+                                </tr>
+                                @php $rowIndex = 1; @endphp
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -248,7 +291,7 @@
                     <div class="card-body p-4 d-flex flex-column justify-content-between">
                         <div class="mb-3">
                             <label class="form-label small fw-semibold text-muted">Customer Notes / Payment Instructions</label>
-                            <textarea class="form-control" name="notes" rows="3" style="resize: vertical; font-size: 0.9rem;" placeholder="Enter any payment instructions, bank notes, or delivery terms...">{{ old('notes') }}</textarea>
+                            <textarea class="form-control" name="notes" rows="3" style="resize: vertical; font-size: 0.9rem;" placeholder="Enter any payment instructions, bank notes, or delivery terms...">{{ old('notes', $invoice->notes) }}</textarea>
                         </div>
                         {{-- Virtual QR Scanner Preview --}}
                         <div class="mt-4 p-3 bg-light border rounded text-center">
@@ -327,7 +370,7 @@
                         {{-- Action Buttons --}}
                         <div class="d-flex gap-2">
                             <button type="submit" name="action" value="publish" class="btn btn-primary btn-lg flex-grow-1 rounded-pill shadow-sm" style="font-weight: 600; padding: 0.75rem 1.5rem;">
-                                <i class="fas fa-check-circle me-2"></i> Create GST Invoice
+                                <i class="fas fa-check-circle me-2"></i> Publish GST Invoice
                             </button>
                             <button type="submit" name="action" value="draft" class="btn btn-outline-primary btn-lg rounded-pill px-4" style="font-weight: 500;">
                                 <i class="fas fa-save me-2"></i> Save as Draft
@@ -341,61 +384,55 @@
             </div>
         </div>
 
-</form>
+    </form>
+</div>
 
-<!-- Add Biller Modal -->
-<div class="modal fade" id="addBillerModal" tabindex="-1" aria-labelledby="addBillerModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form id="addBillerForm">
-        @csrf
-        <div class="modal-header bg-light">
-          <h5 class="modal-title" id="addBillerModalLabel"><i class="fas fa-building text-primary me-2"></i>Add New Biller / GST Holder</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            <div class="mb-2">
-                <label class="form-label small fw-bold">Company Name <span class="text-danger">*</span></label>
-                <input type="text" class="form-control form-control-sm" name="company_name" required>
-            </div>
-            <div class="mb-2">
-                <label class="form-label small fw-bold">GSTIN <span class="text-danger">*</span></label>
-                <div class="position-relative">
-                    <input type="text" class="form-control form-control-sm text-uppercase" name="gstin" id="biller_gstin" maxlength="15" required>
-                    <div id="billerGstSpinner" class="spinner-border spinner-border-sm text-primary position-absolute d-none" role="status" style="right: 10px; top: 6px;">
-                        <span class="visually-hidden">Loading...</span>
+{{-- Add Biller Modal --}}
+<div class="modal fade" id="addBillerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="addBillerForm" action="{{ route('admin.billers.store') }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-building text-primary me-2"></i>Add New Biller</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">GSTIN <span class="text-danger">*</span></label>
+                        <div class="position-relative">
+                            <input type="text" class="form-control form-control-sm text-uppercase" name="gstin" id="biller_gstin" maxlength="15" required>
+                            <div id="billerGstSpinner" class="spinner-border spinner-border-sm text-primary position-absolute d-none" role="status" style="right: 10px; top: 6px;">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">Company Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm" name="company_name" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">State <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm" name="state" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">Address</label>
+                        <textarea class="form-control form-control-sm" name="address" rows="2"></textarea>
                     </div>
                 </div>
-            </div>
-            <div class="mb-2">
-                <label class="form-label small fw-bold">Address</label>
-                <textarea class="form-control form-control-sm" name="address" rows="2"></textarea>
-            </div>
-            <div class="row g-2 mb-2">
-                <div class="col-6">
-                    <label class="form-label small fw-bold">State</label>
-                    <input type="text" class="form-control form-control-sm" name="state">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Save Biller</button>
                 </div>
-                <div class="col-6">
-                    <label class="form-label small fw-bold">Phone</label>
-                    <input type="text" class="form-control form-control-sm" name="phone">
-                </div>
-            </div>
+            </form>
         </div>
-        <div class="modal-footer bg-light p-2">
-          <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-sm btn-primary" id="saveBillerBtn">Save & Select</button>
-        </div>
-      </form>
     </div>
-  </div>
-</div>
 </div>
 @endsection
 
 @push('scripts')
 <script>
-let rowIndex = 1;
+let rowIndex = {{ $rowIndex ?? 1 }};
 const products = @json($products->keyBy('id'));
 
 function calcRow(row) {
@@ -434,6 +471,35 @@ function calcRow(row) {
     updateSummary();
 }
 
+// Initialize stock badges and validation on load
+$('.item-row').each(function() {
+    const row = this;
+    const stockInput = row.querySelector('.item-stock');
+    const stockBadge = row.querySelector('.stock-badge');
+    
+    if (stockInput && stockInput.value !== '') {
+        const stock = parseFloat(stockInput.value);
+        if (stock <= 0) {
+            stockBadge.className = 'badge bg-danger stock-badge';
+        } else if (stock <= 10) {
+            stockBadge.className = 'badge bg-warning text-dark stock-badge';
+        } else {
+            stockBadge.className = 'badge bg-success stock-badge';
+        }
+        
+        // Validate initial quantity
+        const qtyInput = row.querySelector('.qty');
+        if (qtyInput) {
+            const qty = parseFloat(qtyInput.value) || 0;
+            if (qty > stock) {
+                qtyInput.classList.add('is-invalid');
+                qtyInput.style.borderColor = 'red';
+                qtyInput.title = `Only ${stock} units available`;
+            }
+        }
+    }
+});
+
 document.getElementById('invoice_type').addEventListener('change', function() {
     document.querySelectorAll('.item-row').forEach(row => calcRow(row));
     const isWithoutGst = this.value === 'without_gst';
@@ -448,6 +514,7 @@ document.getElementById('invoice_type').addEventListener('change', function() {
     }
 });
 
+updateSummary();
 
 function numberToWordsIndian(num) {
     if (num === 0) return 'Zero';
@@ -544,8 +611,10 @@ function makeRow(idx) {
         else if (!el.classList.contains('gst-rate')) el.value = '';
     });
     clone.querySelector('.gst-rate').value = 0;
-    clone.querySelector('.stock-badge').className = 'badge bg-secondary stock-badge';
-    clone.querySelector('.stock-badge').textContent = 'N/A';
+    if (clone.querySelector('.stock-badge')) {
+        clone.querySelector('.stock-badge').className = 'badge bg-secondary stock-badge';
+        clone.querySelector('.stock-badge').textContent = 'N/A';
+    }
     return clone;
 }
 
@@ -620,59 +689,9 @@ document.getElementById('biller_id').addEventListener('change', function() {
     }
 });
 
-@if(old('biller_id'))
+@if(old('biller_id', $invoice->biller_id))
     document.getElementById('biller_id').dispatchEvent(new Event('change'));
 @endif
-
-// Handle Add Biller Form Submit
-document.getElementById('addBillerForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const btn = document.getElementById('saveBillerBtn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Saving...';
-    btn.disabled = true;
-
-    const formData = new FormData(this);
-    
-    fetch('{{ route("admin.customers.store-ajax") }}', {
-        method: 'POST',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Accept': 'application/json'
-        },
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if(data.success) {
-            const select = document.getElementById('biller_id');
-            const option = new Option(data.customer.company_name || data.customer.name, data.customer.id, true, true);
-            option.dataset.gstin = data.customer.gstin || '';
-            option.dataset.address = data.customer.address || '';
-            option.dataset.state = data.customer.state || '';
-            option.dataset.phone = data.customer.phone || '';
-            
-            select.add(option);
-            select.dispatchEvent(new Event('change'));
-            
-            // Close modal
-            bootstrap.Modal.getInstance(document.getElementById('addBillerModal')).hide();
-            this.reset();
-            
-            alert('Biller added successfully!');
-        } else {
-            alert(data.message || 'Error saving biller. Please check fields.');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while saving.');
-    })
-    .finally(() => {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    });
-});
 
 // GST Auto-fetch for Add Biller Modal
 const billerGstinInput = document.getElementById('biller_gstin');
@@ -801,6 +820,12 @@ if(sameAsBilling) {
     billingName.addEventListener('input', copyBillingToShipping);
     billingAddress.addEventListener('input', copyBillingToShipping);
     billingGstin.addEventListener('input', copyBillingToShipping);
+    
+    // Check initially if they match
+    if(billingName.value && shippingName.value === billingName.value && shippingAddress.value === billingAddress.value) {
+        sameAsBilling.checked = true;
+        copyBillingToShipping();
+    }
 }
 </script>
 @endpush
