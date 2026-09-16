@@ -16,16 +16,22 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="fas fa-file-invoice text-primary me-2"></i>Invoice #{{ $invoice->invoice_no }}</h2>
         <div class="btn-group">
-            <a href="{{ route('admin.invoices.pdf', $invoice) }}" class="btn btn-danger btn-sm" target="_blank">
-                <i class="fas fa-file-pdf me-1"></i>Download GST Bill (PDF)
-            </a>
-            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#whatsappModal">
-                <i class="fab fa-whatsapp me-1"></i>Send on WhatsApp
-            </button>
-            @if($invoice->balance_due > 0)
-            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#paymentModal">
-                <i class="fas fa-rupee-sign me-1"></i>Record Payment
-            </button>
+            @if($invoice->status === 'draft')
+                <a href="{{ route('admin.invoices.edit', $invoice) }}" class="btn btn-warning btn-sm">
+                    <i class="fas fa-edit me-1"></i>Edit Draft
+                </a>
+            @else
+                <a href="{{ route('admin.invoices.pdf', $invoice) }}" class="btn btn-danger btn-sm" target="_blank">
+                    <i class="fas fa-file-pdf me-1"></i>Download GST Bill (PDF)
+                </a>
+                <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#whatsappModal">
+                    <i class="fab fa-whatsapp me-1"></i>Send on WhatsApp
+                </button>
+                @if($invoice->balance_due > 0)
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                    <i class="fas fa-rupee-sign me-1"></i>Record Payment
+                </button>
+                @endif
             @endif
             <a href="{{ route('admin.invoices.index') }}" class="btn btn-secondary btn-sm">
                 <i class="fas fa-arrow-left me-1"></i>Back
@@ -42,15 +48,20 @@
                     <div class="row mb-4 align-items-center">
                         <div class="col-6">
                             <img src="{{ asset('MQ logo.png') }}" alt="Logo" style="max-height:55px; width:auto; object-fit:contain;" class="mb-2">
-                            <h5 class="mb-1 fw-bold text-dark">{{ config('app.company_name', 'Metric Qube Energy Pvt. Ltd.') }}</h5>
-                            <small class="text-muted">{{ config('app.company_address', 'Jaipur, Rajasthan, India') }}</small>
+                            <h5 class="mb-1 fw-bold text-dark">{{ $invoice->biller ? ($invoice->biller->company_name ?: $invoice->biller->name) : config('app.company_name', 'Metric Qube Energy Pvt. Ltd.') }}</h5>
+                            <small class="text-muted">{{ $invoice->biller && $invoice->biller->address ? $invoice->biller->address . ', ' . $invoice->biller->city : config('app.company_address', 'Jaipur, Rajasthan, India') }}</small>
+                            @if($invoice->biller && $invoice->biller->gstin)
+                                <br><small class="text-muted">GSTIN: {{ $invoice->biller->gstin }}</small>
+                            @endif
                         </div>
                         <div class="col-6 text-end">
                             <h3 class="fw-bold mb-1" style="color: #1e40af; letter-spacing: 0.5px;">TAX INVOICE</h3>
                             <p class="mb-1 text-muted">Invoice No: <strong class="text-dark">#{{ $invoice->invoice_no }}</strong></p>
                             <p class="mb-1 text-muted">Date: <strong class="text-dark">{{ $invoice->invoice_date->format('d M Y') }}</strong></p>
                             <p class="mb-1 text-muted">Due Date: <strong class="text-dark">{{ $invoice->due_date->format('d M Y') }}</strong></p>
-                            @if($invoice->payment_status == 'paid')
+                            @if($invoice->status === 'draft')
+                                <span class="badge rounded-pill px-3 py-1 fs-6" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; font-weight:600;">DRAFT</span>
+                            @elseif($invoice->payment_status == 'paid')
                                 <span class="badge rounded-pill px-3 py-1 fs-6" style="background:#dcfce7; color:#15803d; border:1px solid #86efac; font-weight:600;">PAID</span>
                             @elseif($invoice->payment_status == 'partial')
                                 <span class="badge rounded-pill px-3 py-1 fs-6" style="background:#fef3c7; color:#b45309; border:1px solid #fcd34d; font-weight:600;">PARTIAL</span>
@@ -63,26 +74,30 @@
                     <!-- Customer Info -->
                     <div class="row mb-4">
                         <div class="col-md-6 mb-3 mb-md-0">
-                            <div class="p-3 bg-light rounded border">
-                                <h6 class="text-primary fw-bold mb-2"><i class="fas fa-user-circle me-1"></i> BILL TO (CUSTOMER DETAILS)</h6>
-                                <div class="fs-5 fw-bold text-dark">{{ $invoice->customer->name ?? 'N/A' }}</div>
-                                @if($invoice->customer)
-                                    @if($invoice->customer->company_name)
-                                        <div class="text-muted"><i class="fas fa-building fa-sm me-1"></i> {{ $invoice->customer->company_name }}</div>
-                                    @endif
+                            <div class="p-3 bg-light rounded border h-100">
+                                <h6 class="text-primary fw-bold mb-2"><i class="fas fa-file-invoice-dollar me-1"></i> BILL TO</h6>
+                                <div class="fs-5 fw-bold text-dark">{{ $invoice->billing_name ?: ($invoice->customer->company_name ?: ($invoice->customer->name ?? 'N/A')) }}</div>
+                                
+                                @if($invoice->billing_address)
+                                    <div><i class="fas fa-map-marker-alt fa-sm me-1 text-danger"></i> {!! nl2br(e($invoice->billing_address)) !!}</div>
+                                @elseif($invoice->customer)
                                     @if($invoice->customer->address)
                                         <div><i class="fas fa-map-marker-alt fa-sm me-1 text-danger"></i> {{ $invoice->customer->address }}</div>
                                     @endif
                                     @if($invoice->customer->city || $invoice->customer->state || $invoice->customer->pin)
-                                        <div class="text-muted small ps-3">{{ implode(', ', array_filter([$invoice->customer->city, $invoice->customer->state, $invoice->customer->pin])) }}</div>
+                                        <div class="text-muted small ps-4">{{ implode(', ', array_filter([$invoice->customer->city, $invoice->customer->state, $invoice->customer->pin])) }}</div>
                                     @endif
-                                    @if($invoice->customer->gstin)
-                                        <div class="mt-2">
-                                            <span class="badge bg-primary fs-6 px-2 py-1"><i class="fas fa-id-card me-1"></i> GSTIN: {{ $invoice->customer->gstin }}</span>
-                                        </div>
-                                    @endif
+                                @endif
+                                
+                                @if($invoice->billing_gstin || ($invoice->customer && $invoice->customer->gstin))
+                                    <div class="mt-2">
+                                        <span class="badge bg-primary fs-6 px-2 py-1"><i class="fas fa-id-card me-1"></i> GSTIN: {{ $invoice->billing_gstin ?: $invoice->customer->gstin }}</span>
+                                    </div>
+                                @endif
+                                
+                                @if(!$invoice->billing_name && $invoice->customer)
                                     @if($invoice->customer->phone)
-                                        <div class="mt-1"><i class="fas fa-phone fa-sm me-1 text-success"></i> {{ $invoice->customer->phone }}</div>
+                                        <div class="mt-2"><i class="fas fa-phone fa-sm me-1 text-success"></i> {{ $invoice->customer->phone }}</div>
                                     @endif
                                     @if($invoice->customer->email)
                                         <div><i class="fas fa-envelope fa-sm me-1 text-info"></i> {{ $invoice->customer->email }}</div>
@@ -90,14 +105,30 @@
                                 @endif
                             </div>
                         </div>
-                        @if($invoice->client)
-                        <div class="col-md-6">
-                            <div class="p-3 bg-light rounded border">
+
+                        @if($invoice->shipping_name)
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <div class="p-3 bg-light rounded border h-100">
+                                <h6 class="text-success fw-bold mb-2"><i class="fas fa-shipping-fast me-1"></i> SHIP TO</h6>
+                                <div class="fs-5 fw-bold text-dark">{{ $invoice->shipping_name }}</div>
+                                @if($invoice->shipping_address)
+                                    <div><i class="fas fa-map-marker-alt fa-sm me-1 text-danger"></i> {!! nl2br(e($invoice->shipping_address)) !!}</div>
+                                @endif
+                                @if($invoice->shipping_gstin)
+                                    <div class="mt-2">
+                                        <span class="badge bg-success fs-6 px-2 py-1"><i class="fas fa-id-card me-1"></i> GSTIN: {{ $invoice->shipping_gstin }}</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                        @elseif($invoice->client)
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <div class="p-3 bg-light rounded border h-100">
                                 <h6 class="text-secondary fw-bold mb-2"><i class="fas fa-briefcase me-1"></i> CLIENT / BILLED TO</h6>
-                                <strong class="fs-6">{{ $invoice->client->name }}</strong>
-                                @if($invoice->client->address) <div class="text-muted">{{ $invoice->client->address }}</div>@endif
-                                @if($invoice->client->phone) <div><i class="fas fa-phone fa-sm me-1"></i> {{ $invoice->client->phone }}</div>@endif
-                                @if($invoice->client->email) <div><i class="fas fa-envelope fa-sm me-1"></i> {{ $invoice->client->email }}</div>@endif
+                                <div class="fs-5 fw-bold text-dark">{{ $invoice->client->name }}</div>
+                                @if($invoice->client->address) <div><i class="fas fa-map-marker-alt fa-sm me-1 text-danger"></i> {{ $invoice->client->address }}</div>@endif
+                                @if($invoice->client->phone) <div class="mt-2"><i class="fas fa-phone fa-sm me-1 text-success"></i> {{ $invoice->client->phone }}</div>@endif
+                                @if($invoice->client->email) <div><i class="fas fa-envelope fa-sm me-1 text-info"></i> {{ $invoice->client->email }}</div>@endif
                             </div>
                         </div>
                         @endif
@@ -164,39 +195,27 @@
 
                     @if($invoice->include_payment_info)
                     <div class="card mb-3 border-info">
-                        <div class="card-header bg-info text-white py-2">
-                            <strong><i class="fas fa-university me-1"></i> Payment & Bank Details</strong>
+                        <div class="card-header bg-info text-white py-2 text-center">
+                            <strong><i class="fas fa-qrcode me-1"></i> Scan to Pay</strong>
                         </div>
-                        <div class="card-body bg-light row align-items-center">
-                            <div class="col-md-8">
-                                <ul class="list-unstyled mb-0">
-                                    <li><strong>Bank Name:</strong> {{ $invoice->bank_name ?: 'N/A' }}</li>
-                                    <li><strong>Account Name:</strong> {{ $invoice->bank_account_name ?: 'N/A' }}</li>
-                                    <li><strong>Account Number:</strong> {{ $invoice->bank_account_number ?: 'N/A' }}</li>
-                                    <li><strong>IFSC Code:</strong> {{ $invoice->bank_ifsc ?: 'N/A' }}</li>
-                                    <li><strong>UPI ID:</strong> {{ $invoice->upi_id ?: 'N/A' }}</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-4 text-center">
-                                @php
-                                    $upiId = $invoice->upi_id ?: \App\Models\CompanySetting::get('upi_id');
-                                    $payeeName = $invoice->bank_account_name ?: \App\Models\CompanySetting::get('bank_account_name', config('app.name'));
-                                    $amount = $invoice->total;
-                                    
-                                    if ($upiId) {
-                                        $qrData = "upi://pay?pa={$upiId}&pn={$payeeName}&am={$amount}&cu=INR";
-                                        $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode($qrData);
-                                    } else {
-                                        // Fallback to a placeholder QR if UPI ID is not set
-                                        $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode("UPI ID Not Set");
-                                    }
-                                @endphp
+                        <div class="card-body bg-light text-center">
+                            @php
+                                $upiId = $invoice->upi_id ?: 'yespay.mabs1495269ikit0072@yesbankltd';
+                                $payeeName = $invoice->bank_account_name ?: 'METRIC QUBE ENERGY PRIVATE LIMITED';
+                                $amount = $invoice->total;
                                 
-                                <img src="{{ $qrUrl }}" alt="UPI QR" class="img-thumbnail" style="max-height: 120px;">
-                                <div class="small text-muted mt-1 fw-bold">Scan to Pay</div>
-                                @if(!$upiId)
-                                    <div class="small text-danger mt-1" style="font-size: 10px;">(Please add UPI ID)</div>
-                                @endif
+                                if ($upiId) {
+                                    $qrData = "upi://pay?pa={$upiId}&pn={$payeeName}&am={$amount}&cu=INR";
+                                    $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" . urlencode($qrData);
+                                } else {
+                                    $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" . urlencode("UPI ID Not Set");
+                                }
+                            @endphp
+                            
+                            <img src="{{ $qrUrl }}" alt="UPI QR" class="img-thumbnail shadow-sm p-2" style="max-height: 200px; border-radius: 10px;">
+                            <div class="mt-3">
+                                <h6 class="fw-bold mb-1">Scan this QR Code with any app to pay</h6>
+                                <p class="text-muted mb-0">UPI ID: <strong>{{ $upiId }}</strong></p>
                             </div>
                         </div>
                     </div>
@@ -251,17 +270,25 @@
                 </div>
             </div>
 
-            @if($invoice->balance_due > 0)
-            <div class="d-grid">
-                <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#paymentModal">
-                    <i class="fas fa-rupee-sign me-2"></i>Record Payment
-                </button>
-            </div>
+            @if($invoice->status !== 'draft')
+                @if($invoice->balance_due > 0)
+                <div class="d-grid">
+                    <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                        <i class="fas fa-rupee-sign me-2"></i>Record Payment
+                    </button>
+                </div>
+                @else
+                <div class="alert alert-success text-center">
+                    <i class="fas fa-check-circle fa-2x mb-2"></i><br>
+                    <strong>Fully Paid!</strong>
+                </div>
+                @endif
             @else
-            <div class="alert alert-success text-center">
-                <i class="fas fa-check-circle fa-2x mb-2"></i><br>
-                <strong>Fully Paid!</strong>
-            </div>
+                <div class="alert alert-warning text-center">
+                    <i class="fas fa-pencil-alt fa-2x mb-2"></i><br>
+                    <strong>Draft Invoice</strong><br>
+                    <small>Publish to record payments.</small>
+                </div>
             @endif
         </div>
     </div>

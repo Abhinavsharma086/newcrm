@@ -216,16 +216,20 @@
             <table class="header-info">
                 <tr>
                     <td style="width: 70%;">
-                        <div class="company-name">{{ config('app.company_name', 'Metric Qube Energy Pvt. Ltd.') }}</div>
+                        <div class="company-name">{{ $invoice->biller ? ($invoice->biller->company_name ?: $invoice->biller->name) : config('app.company_name', 'Metric Qube Energy Pvt. Ltd.') }}</div>
                         <div class="banner">Powering Intelligent Energy Solutions</div>
                         <br>
-                        {!! nl2br(e(config('app.company_address', "Plot No 123, Industrial Area,\nJaipur, Rajasthan - 302001"))) !!}
+                        @if($invoice->biller && $invoice->biller->address)
+                            {!! nl2br(e($invoice->biller->address . "\n" . implode(', ', array_filter([$invoice->biller->city, $invoice->biller->state, $invoice->biller->pin])))) !!}
+                        @else
+                            {!! nl2br(e(config('app.company_address', "Plot No 123, Industrial Area,\nJaipur, Rajasthan - 302001"))) !!}
+                        @endif
                     </td>
                     <td style="width: 30%; text-align: right; vertical-align: top;">
                         <img src="{{ public_path('MQ logo.png') }}" alt="Logo" style="max-height: 60px; max-width: 150px; margin-bottom: 5px;"><br>
-                        Tel : {{ config('app.company_phone', '+91 98765 43210') }}<br>
+                        Tel : {{ $invoice->biller ? $invoice->biller->phone : config('app.company_phone', '+91 98765 43210') }}<br>
                         Web : {{ config('app.url', 'www.metricqube.com') }}<br>
-                        Email : {{ config('app.company_email', 'info@metricqube.com') }}
+                        Email : {{ $invoice->biller ? $invoice->biller->email : config('app.company_email', 'info@metricqube.com') }}
                     </td>
                 </tr>
             </table>
@@ -234,7 +238,14 @@
         <!-- Title Bar -->
         <table class="title-bar">
             <tr>
-                <td class="pan">PAN : {{ config('app.company_pan', 'ABCDE1234F') }}</td>
+                <td class="pan">
+                    @if($invoice->biller && $invoice->biller->gstin)
+                        PAN : {{ substr($invoice->biller->gstin, 2, 10) }} <br>
+                        GSTIN : {{ $invoice->biller->gstin }}
+                    @else
+                        PAN : {{ config('app.company_pan', 'ABCDE1234F') }}
+                    @endif
+                </td>
                 <td class="tax-invoice">
                     @if($invoice->invoice_type === 'proforma') PROFORMA INVOICE
                     @elseif($invoice->invoice_type === 'without_gst') BILL OF SUPPLY
@@ -249,29 +260,45 @@
         <table class="details-section">
             <tr>
                 <td class="customer-col">
-                    <div class="section-heading">Customer Detail</div>
+                    <div class="section-heading">Billed To</div>
                     <table class="inner-table">
                         <tr>
                             <td class="lbl">M/S</td>
-                            <td><strong>{{ $invoice->customer->company_name ?: $invoice->customer->name }}</strong></td>
+                            <td><strong>{{ $invoice->billing_name ?: ($invoice->customer->company_name ?: $invoice->customer->name) }}</strong></td>
                         </tr>
                         <tr>
                             <td class="lbl">Address</td>
-                            <td>{{ $invoice->customer->address }}<br>{{ implode(', ', array_filter([$invoice->customer->city, $invoice->customer->state, $invoice->customer->pin])) }}</td>
-                        </tr>
-                        <tr>
-                            <td class="lbl">Phone</td>
-                            <td>{{ $invoice->customer->phone }}</td>
+                            <td>{!! nl2br(e($invoice->billing_address ?: ($invoice->customer->address . "\n" . implode(', ', array_filter([$invoice->customer->city, $invoice->customer->state, $invoice->customer->pin]))))) !!}</td>
                         </tr>
                         <tr>
                             <td class="lbl">GSTIN</td>
-                            <td><strong>{{ $invoice->customer->gstin ?? 'N/A' }}</strong></td>
+                            <td><strong>{{ $invoice->billing_gstin ?: ($invoice->customer->gstin ?? 'N/A') }}</strong></td>
                         </tr>
+                        @if(!$invoice->billing_name && $invoice->customer)
                         <tr>
                             <td class="lbl">Place of<br>Supply</td>
                             <td>{{ $invoice->customer->state }} ( {{ $invoice->customer->state_code ?? '08' }} )</td>
                         </tr>
+                        @endif
                     </table>
+
+                    @if($invoice->shipping_name)
+                    <div class="section-heading" style="border-top: 1px solid #000;">Shipped To</div>
+                    <table class="inner-table">
+                        <tr>
+                            <td class="lbl">M/S</td>
+                            <td><strong>{{ $invoice->shipping_name }}</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="lbl">Address</td>
+                            <td>{!! nl2br(e($invoice->shipping_address)) !!}</td>
+                        </tr>
+                        <tr>
+                            <td class="lbl">GSTIN</td>
+                            <td><strong>{{ $invoice->shipping_gstin ?? 'N/A' }}</strong></td>
+                        </tr>
+                    </table>
+                    @endif
                 </td>
                 <td class="invoice-col">
                     <table class="inner-table">
@@ -413,16 +440,16 @@
                     </div>
                     
                     @if(isset($invoice->include_payment_info) && $invoice->include_payment_info)
-                    <div style="border-bottom: 1px solid #000; padding: 4px; text-align: center; font-weight: bold; font-size: 9px; background-color: #f9f9f9;">Bank Details</div>
-                    <div style="padding: 5px;">
+                    <div style="border-bottom: 1px solid #000; padding: 4px; text-align: center; font-weight: bold; font-size: 9px; background-color: #f9f9f9;">Scan to Pay</div>
+                    <div style="padding: 10px; text-align: center;">
                         @php
-                            $upiId = $invoice->upi_id ?: \App\Models\CompanySetting::get('upi_id', 'metricqube@icici');
-                            $payeeName = $invoice->bank_account_name ?: \App\Models\CompanySetting::get('bank_account_name', config('app.name'));
+                            $upiId = $invoice->upi_id ?: 'yespay.mabs1495269ikit0072@yesbankltd';
+                            $payeeName = $invoice->bank_account_name ?: 'METRIC QUBE ENERGY PRIVATE LIMITED';
                             $amount = $invoice->total;
                             $qrBase64 = null;
                             if ($upiId) {
                                 $qrData = "upi://pay?pa={$upiId}&pn={$payeeName}&am={$amount}&cu=INR";
-                                $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=" . urlencode($qrData);
+                                $qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode($qrData);
                                 try {
                                     $context = stream_context_create(['http' => ['timeout' => 3]]);
                                     $qrImage = @file_get_contents($qrUrl, false, $context);
@@ -432,19 +459,12 @@
                         @endphp
                         
                         @if($qrBase64)
-                        <div style="float: right; text-align: center;">
-                            <img src="{{ $qrBase64 }}" alt="QR Code" class="qr-code"><br>
-                            <span style="font-weight: bold; font-size: 9px;">Pay using UPI</span>
+                        <div style="text-align: center; margin: 0 auto;">
+                            <img src="{{ $qrBase64 }}" alt="QR Code" style="width: 120px; height: 120px; border: 1px solid #ddd; padding: 5px;"><br>
+                            <span style="font-weight: bold; font-size: 11px; display: block; margin-top: 5px;">Scan this QR Code with any app to pay</span>
+                            <span style="font-size: 10px; color: #555;">UPI ID: <strong>{{ $upiId }}</strong></span>
                         </div>
                         @endif
-                        
-                        <table class="bank-details-table">
-                            <tr><td class="lbl">Name</td><td>{{ $invoice->bank_name ?: 'ICICI Bank' }}</td></tr>
-                            <tr><td class="lbl">Branch</td><td>{{ $invoice->bank_branch ?: 'Main Branch' }}</td></tr>
-                            <tr><td class="lbl">Acc. Number</td><td>{{ $invoice->bank_account_number ?: '2715500356' }}</td></tr>
-                            <tr><td class="lbl">IFSC</td><td>{{ $invoice->bank_ifsc ?: 'ICIC045F' }}</td></tr>
-                            <tr><td class="lbl">UPI ID</td><td>{{ $upiId }}</td></tr>
-                        </table>
                     </div>
                     @endif
                     
@@ -499,7 +519,7 @@
                         Certified that the particulars given above are true and correct.
                     </div>
                     <div style="padding: 5px; text-align: center; font-weight: bold; border-bottom: 1px solid #000;">
-                        For {{ config('app.company_name', 'Metric Qube Energy Pvt. Ltd.') }}
+                        For {{ $invoice->biller ? ($invoice->biller->company_name ?: $invoice->biller->name) : config('app.company_name', 'Metric Qube Energy Pvt. Ltd.') }}
                     </div>
                     
                     <div class="auth-sign-box">
